@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<configuration>
+  <layouts>
+    <layout id="default">${groupIdPath}/${artifactId}/${version}/${artifactId}-${version}${classifier}.${type}</layout>
+    <layout id="legacy">${groupId}/${type}s/${artifactId}-${version}${classifier}.${type}</layout>
+  </layouts>
+  <repositories>
+    <repository layout="default">http://download.java.net/maven/2/</repository>
+    <repository layout="legacy">http://download.java.net/maven/1/</repository>
+    <repository layout="default">http://repo1.maven.org/maven2/</repository>
+  </repositories>
+</configuration>

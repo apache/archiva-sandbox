@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><archetype>
+  <id>org.apache.sling.launchpad.webapp</id>
+  <resources>
+    <resource>src/main/assembly/bin.xml</resource>
+    <resource>LICENSE</resource>
+    <resource>NOTICE</resource>
+    <resource>README.txt</resource>
+  </resources>
+</archetype>
