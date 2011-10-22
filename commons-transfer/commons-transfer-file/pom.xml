@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>commons-transfer-parent</artifactId>
+    <groupId>org.apache.archiva.commons.transfer</groupId>
+    <version>1.2-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>commons-transfer-file</artifactId>
+  <name>Commons Transfer :: file:// provider</name>
+  <build />
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.archiva.commons.transfer</groupId>
+      <artifactId>commons-transfer-api</artifactId>
+      <version>1.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>1.2</version>
+    </dependency>
+  </dependencies>
+</project>
