@@ -17,9 +17,9 @@ import org.codehaus.plexus.registry.RegistryListener;
 /**
  * <code>SimpleArtifactConsumer</code>
  * 
- * @plexus.component role="org.apache.archiva.consumers.KnownRepositoryContentConsumer"
- *                   role-hint="simple-artifact-consumer" instantiation-strategy="per-lookup"
  */
+@Service("knownRepositoryContentConsumer#simple")
+@Scope("prototype")
 public class SimpleArtifactConsumer
     extends AbstractMonitoredConsumer
     implements KnownRepositoryContentConsumer, RegistryListener, Initializable

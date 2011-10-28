@@ -29,7 +29,8 @@
   <groupId>org.apache.archiva</groupId>
   <artifactId>archiva-consumer-plugin-archetype</artifactId>
   <version>1.4-SNAPSHOT</version>
-  <name>Archiva Consumers :: Consumers Plugin Archetype</name>
+  <packaging>maven-archetype</packaging>
+  <name>Archiva Consumers :: Consumers Archetype</name>
   <description>Simple archetype to create archiva consumers</description>
 
   <build>
