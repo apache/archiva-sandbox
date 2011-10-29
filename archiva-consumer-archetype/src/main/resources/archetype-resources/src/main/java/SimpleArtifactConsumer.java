@@ -1,4 +1,4 @@
-package org.example.consumer;
+package $package;
 
 import java.util.ArrayList;
 import java.util.List;

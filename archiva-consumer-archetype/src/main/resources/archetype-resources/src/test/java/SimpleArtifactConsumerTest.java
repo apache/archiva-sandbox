@@ -1,4 +1,4 @@
-package org.example.consumer;
+package $package;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
