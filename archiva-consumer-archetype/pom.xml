@@ -27,13 +27,22 @@
   </parent>
 
   <groupId>org.apache.archiva</groupId>
-  <artifactId>archiva-consumer-plugin-archetype</artifactId>
+  <artifactId>archiva-consumer-archetype</artifactId>
   <version>1.4-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
   <name>Archiva Consumers :: Consumers Archetype</name>
   <description>Simple archetype to create archiva consumers</description>
+  <properties>
+    <archivaVersion>1.4-M2-SNAPSHOT</archivaVersion>
+  </properties>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <extensions>
       <extension>
         <groupId>org.apache.maven.archetype</groupId>

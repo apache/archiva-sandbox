@@ -13,28 +13,28 @@
     component can be plugged in Archiva.
   </description>
   <properties>
-    <archivaVersion>1.4-M1</archivaVersion>
+    <archiva.version>${archivaVersion}</archiva.version>
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.archiva</groupId>
       <artifactId>archiva-consumer-api</artifactId>
-      <version>${archivaVersion}</version>
+      <version>${archiva.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.archiva</groupId>
       <artifactId>archiva-configuration</artifactId>
-      <version>${archivaVersion}</version>
+      <version>${archiva.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.archiva</groupId>
       <artifactId>archiva-repository-layer</artifactId>
-      <version>${archivaVersion}</version>
+      <version>${archiva.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.archiva</groupId>
       <artifactId>archiva-indexer</artifactId>
-      <version>${archivaVersion}</version>
+      <version>${archiva.version}</version>
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>
