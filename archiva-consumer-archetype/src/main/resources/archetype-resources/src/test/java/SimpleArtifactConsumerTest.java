@@ -21,84 +21,80 @@ package $package;
 
 import java.io.File;
 
-import org.apache.archiva.configuration.ManagedRepositoryConfiguration;
+import org.apache.archiva.admin.model.beans.ManagedRepository;
 import org.apache.archiva.consumers.KnownRepositoryContentConsumer;
-import org.codehaus.plexus.PlexusTestCase;
-import org.codehaus.plexus.logging.Logger;
 import org.easymock.EasyMock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import junit.framework.TestCase;
 
 /**
  * <code>SimpleArtifactConsumerTest</code>
  */
+@RunWith( SpringJUnit4ClassRunner.class )
+@ContextConfiguration( locations = {"classpath*:/META-INF/spring-context.xml","classpath:/spring-context.xml"} )
 public class SimpleArtifactConsumerTest
-    extends PlexusTestCase
+    extends TestCase
 {
+    @Inject
     private SimpleArtifactConsumer consumer;
 
     private File repoDir;
 
-    private ManagedRepositoryConfiguration testRepository;
+    private ManagedRepository testRepository;
 
-    private Logger mockLogger;
+    private Logger log = LoggerFactory.getLogger( SimpleArtifactConsumer.class );
 
-    protected void setUp()
+    @Before
+    public void setUp()
         throws Exception
     {
         super.setUp();
         String consumerRole = KnownRepositoryContentConsumer.class.getName();
-        consumer = (SimpleArtifactConsumer) lookup( consumerRole, "simple-artifact-consumer" );
 
         setUpMockRepository();
-        setupMockLogger();
+
     }
 
-    private void setupMockLogger()
-    {       
-        mockLogger = (Logger) EasyMock.createNiceMock(Logger.class); 
-        consumer.enableLogging( mockLogger );
-    }
+
 
     private void setUpMockRepository()
     {
-        repoDir = new java.io.File( getBasedir(), "/target/test-consumer-repo" );
+        repoDir = new java.io.File( "target/test-consumer-repo" );
         repoDir.mkdirs();
         repoDir.deleteOnExit();
 
-        testRepository = new ManagedRepositoryConfiguration();
+        testRepository = new ManagedRepository();
         testRepository.setName( "Test-Consumer-Repository" );
         testRepository.setId( "test-consumer-repository" );
         testRepository.setLocation( repoDir.getAbsolutePath() );
     }
 
+    @Test
     public void testBeginScan()
         throws Exception
     {
-        mockLogger.info( "Beginning scan of repository [test-consumer-repository]" );
-        EasyMock.expectLastCall();
-        EasyMock.replay(mockLogger);
+        log.info( "Beginning scan of repository [test-consumer-repository]" );
 
         consumer.beginScan( testRepository );
 
-        EasyMock.verify();
     }
 
+    @Test
     public void testProcessFile()
         throws Exception
     {
-        mockLogger.info( "Beginning scan of repository [test-consumer-repository]" );
-        EasyMock.expectLastCall();
-        mockLogger.info( "Processing entry [org/simple/test/testartifact/testartifact/1.0/testartifact-1.0.pom]"
-            + " from repository [test-consumer-repository]" );
-        EasyMock.expectLastCall();
-        mockLogger.info( "Processing entry [org/simple/test/testartifact/testartifact/1.1/testartifact-1.1.pom]"
-            + " from repository [test-consumer-repository]" );
-        EasyMock.expectLastCall();
-        EasyMock.replay(mockLogger);
-
         consumer.beginScan( testRepository );
         consumer.processFile( "org/simple/test/testartifact/testartifact/1.0/testartifact-1.0.pom" );
         consumer.processFile( "org/simple/test/testartifact/testartifact/1.1/testartifact-1.1.pom" );
-        EasyMock.verify(mockLogger);
     }
 
 }
