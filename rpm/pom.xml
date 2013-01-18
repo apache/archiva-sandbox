@@ -1,0 +1,252 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.archiva</groupId>
+    <artifactId>archiva-parent</artifactId>
+    <version>8</version>
+  </parent>
+
+  <groupId>org.apache.archiva.rpm</groupId>
+  <artifactId>archiva</artifactId>
+  <version>1.4-M4-SNAPSHOT</version>
+  <packaging>rpm</packaging>
+  <name>Apache Archiva :: RPM</name>
+  <description>Apache Archiva RPM distribution</description>
+
+  <properties>
+    <rpm.source.location>${project.build.directory}/rpm-unpack/apache-archiva-${project.version}</rpm.source.location>
+    <rpm.chkconfig>2345\ 90\ 10</rpm.chkconfig>
+    <rpm.username>archiva</rpm.username>
+    <rpm.groupname>archiva</rpm.groupname>
+    <rpm.installationPath>/usr/share</rpm.installationPath>
+    <rpm.varPath>/var/lib</rpm.varPath>
+    <rpm.installationFolder>${project.artifactId}</rpm.installationFolder>
+  </properties>
+
+  <!-- TODO: 
+       - link /etc/archiva to conf directory and /var/log/archiva to logs directory 
+       - split by architecture, with correct wrapper lib to avoid x86-32 problems on x86-64
+    -->
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-tarballs</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/rpm-unpack</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.archiva</groupId>
+                  <artifactId>archiva-jetty-js</artifactId>
+                  <version>${project.version}</version>
+                  <type>tar.gz</type>
+                  <classifier>bin</classifier>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-patch-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>patch</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>apply</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <targetDirectory>${rpm.source.location}</targetDirectory>
+          <naturalOrderProcessing>true</naturalOrderProcessing>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rpm-maven-plugin</artifactId>
+        <version>2.1-alpha-1</version>
+        <extensions>true</extensions>
+        <configuration>
+          <group>Development/Tools</group>
+          <defaultUsername>${rpm.username}</defaultUsername>
+          <defaultGroupname>${rpm.groupname}</defaultGroupname>
+          <defaultFilemode>644</defaultFilemode>
+          <defaultDirmode>755</defaultDirmode>
+          <copyright>Copyright ${project.inceptionYear} ${project.organization.name}.</copyright>
+          <mappings>
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}</directory>
+            </mapping>
+            <!-- license -->
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}</directory>
+              <sources>
+                <source>
+                  <location>${rpm.source.location}</location>
+                  <includes>
+                    <include>*</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+            <!-- apps, lib folders -->
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}/apps</directory>
+              <sources>
+                <source>
+                  <location>${rpm.source.location}/apps</location>
+                </source>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}/lib</directory>
+              <sources>
+                <source>
+                  <location>${rpm.source.location}/lib</location>
+                </source>
+              </sources>
+            </mapping>
+            <!-- bin files -->
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}/bin</directory>
+              <filemode>755</filemode>
+              <sources>
+                <source>
+                  <location>${rpm.source.location}/bin</location>
+                </source>
+              </sources>
+            </mapping>
+            <!-- config and data files -->
+            <mapping>
+              <directory>${rpm.varPath}/${rpm.installationFolder}/conf</directory>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>${rpm.source.location}/conf</location>
+                </source>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>${rpm.varPath}/${rpm.installationFolder}/logs</directory>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>${rpm.source.location}/logs</location>
+                </source>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>${rpm.varPath}/${rpm.installationFolder}/temp</directory>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>${rpm.source.location}/temp</location>
+                </source>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>${rpm.varPath}/${rpm.installationFolder}</directory>
+              <filemode>700</filemode>
+            </mapping>
+ 
+            <!-- Add links from the app to ${rpm.varPath} -->
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}/conf</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <softlinkSource>
+                  <location>${rpm.varPath}/${rpm.installationFolder}/conf</location>
+                </softlinkSource>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}/data</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <softlinkSource>
+                  <location>${rpm.varPath}/${rpm.installationFolder}/data</location>
+                </softlinkSource>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}/logs</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <softlinkSource>
+                  <location>${rpm.varPath}/${rpm.installationFolder}/logs</location>
+                </softlinkSource>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>${rpm.installationPath}/${rpm.installationFolder}/temp</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <softlinkSource>
+                  <location>${rpm.varPath}/${rpm.installationFolder}/temp</location>
+                </softlinkSource>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/init.d</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <filemode>755</filemode>
+              <sources>
+                <softlinkSource>
+                  <location>${rpm.installationPath}/${rpm.installationFolder}/bin/${project.artifactId}</location>
+                </softlinkSource>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>/etc/profile.d</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <filemode>755</filemode>
+              <sources>
+                <source>
+                  <location>${basedir}/src/main/rpm/etc/profile.d</location>
+                </source>
+              </sources>
+            </mapping>
+          </mappings>
+          <preinstallScriptlet>
+            <script>
+# add user
+/usr/sbin/groupadd -r -f archiva
+/usr/bin/id archiva >/dev/null 2>&amp;1 || /usr/sbin/useradd -M -r -g archiva -d ${rpm.varPath}/${rpm.installationFolder} -s /bin/bash -c "Apache Archiva" archiva > /dev/null 2>&amp;1
+            </script>
+          </preinstallScriptlet>
+          <postinstallScriptlet>
+            <script>
+# add service
+/sbin/chkconfig --add ${project.artifactId}
+/sbin/chkconfig ${project.artifactId} on
+
+# HACK: include here until there is a global option in the RPM plugin
+%global _binaries_in_noarch_packages_terminate_build   0
+            </script>
+          </postinstallScriptlet>
+          <preremoveScriptlet>
+            <script>
+# stop and delete service
+/sbin/service ${project.artifactId} stop
+/sbin/chkconfig --del ${project.artifactId}
+            </script>
+          </preremoveScriptlet>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

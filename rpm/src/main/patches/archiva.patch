@@ -1,0 +1,20 @@
+--- bin/archiva	2012-03-22 15:50:17.000000000 +1100
++++ bin/archiva	2012-04-04 17:12:46.000000000 +1000
+@@ -10,6 +10,8 @@
+ #-----------------------------------------------------------------------------
+ # These settings can be modified to fit the needs of your application
+ 
++. /etc/profile.d/archiva.sh 
++
+ # Application
+ APP_NAME="archiva"
+ APP_LONG_NAME="Apache Archiva JS"
+@@ -50,7 +52,7 @@
+ 
+ # The following two lines are used by the chkconfig command. Change as is
+ #  appropriate for your application.  They should remain commented.
+-# chkconfig: 2345 20 80
++# chkconfig: 2345 90 10
+ # description: Apache Archiva JS
+ 
+ # Do not modify anything beyond this point
