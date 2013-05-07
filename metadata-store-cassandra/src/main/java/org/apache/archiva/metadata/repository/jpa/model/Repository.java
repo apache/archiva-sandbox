@@ -1,6 +1,5 @@
 package org.apache.archiva.metadata.repository.jpa.model;
 
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;

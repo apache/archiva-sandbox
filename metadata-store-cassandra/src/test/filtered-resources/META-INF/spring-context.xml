@@ -22,5 +22,13 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+  <bean id="achillesEntityManagerFactory" class="info.archinnov.achilles.integration.spring.ThriftEntityManagerFactoryBean"
+        init-method="initialize">
+    <property name="entityPackages" value="my.package1,my.package2"/>
+    <property name="cassandraHost" value="localhost:9160"/>
+    <property name="clusterName" value="Test Cluster"/>
+    <property name="keyspaceName" value="Test Keyspace"/>
+    <property name="forceColumnFamilyCreation" value="true" />
+  </bean>
 
 </beans>

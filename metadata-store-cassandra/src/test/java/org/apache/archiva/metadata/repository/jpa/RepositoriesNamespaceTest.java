@@ -1,5 +1,6 @@
 package org.apache.archiva.metadata.repository.jpa;
 
+import info.archinnov.achilles.entity.manager.ThriftEntityManager;
 import org.apache.archiva.metadata.repository.jpa.model.Repository;
 import org.apache.archiva.test.utils.ArchivaSpringJUnit4ClassRunner;
 import org.fest.assertions.api.Assertions;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -23,16 +25,15 @@ import java.util.List;
 @ContextConfiguration( locations = { "classpath*:/META-INF/spring-context.xml", "classpath*:/spring-context.xml" } )
 public class RepositoriesNamespaceTest
 {
-    EntityManagerFactory emf = null;
-
-    EntityManager em = null;
+    @Inject
+    private ThriftEntityManager em;
 
     @Before
     public void setup()
         throws Exception
     {
-        emf = Persistence.createEntityManagerFactory( "archiva_meta" );
-        em = emf.createEntityManager();
+        //emf = Persistence.createEntityManagerFactory( "archiva" );
+        //em = emf.createEntityManager();
     }
 
     @After
@@ -40,7 +41,7 @@ public class RepositoriesNamespaceTest
         throws Exception
     {
         em.close();
-        emf.close();
+        //emf.close();
     }
 
     @Test
@@ -56,8 +57,6 @@ public class RepositoriesNamespaceTest
         em.persist( repo2 );
 
         em.flush();
-
-        em.clear();
 
         Repository repositoryFromData = em.find( Repository.class, "releases" );
 
