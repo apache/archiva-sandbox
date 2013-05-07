@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Test set: org.apache.archiva.metadata.repository.jpa.RepositoriesNamespaceTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 1.072 sec <<< FAILURE!
+addRepositories(org.apache.archiva.metadata.repository.jpa.RepositoriesNamespaceTest)  Time elapsed: 0.951 sec  <<< ERROR!
+javax.persistence.PersistenceException: No Persistence provider for EntityManager named archiva_meta
+	at javax.persistence.Persistence.createEntityManagerFactory(Unknown Source)
+	at javax.persistence.Persistence.createEntityManagerFactory(Unknown Source)
+	at org.apache.archiva.metadata.repository.jpa.RepositoriesNamespaceTest.setup(RepositoriesNamespaceTest.java:34)
+
+addRepositories(org.apache.archiva.metadata.repository.jpa.RepositoriesNamespaceTest)  Time elapsed: 0.953 sec  <<< ERROR!
+java.lang.NullPointerException: null
+	at org.apache.archiva.metadata.repository.jpa.RepositoriesNamespaceTest.shutdown(RepositoriesNamespaceTest.java:42)
+

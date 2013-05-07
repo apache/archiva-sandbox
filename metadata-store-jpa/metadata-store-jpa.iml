@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Osmorc" name="OSGi">
+      <configuration manifestGenerationMode="OsmorcControlled" manifestLocation="" jarfileLocation="metadata-store-jpa-1.4-M4-SNAPSHOT.jar" outputPathType="CompilerOutputPath" bndFileLocation="" bundlorFileLocation="" bundleActivator="" bundleSymbolicName="org.apache.archiva.metadata.repository.jpa" bundleVersion="1.4-M4-SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="true" alwaysRebuildBundleJAR="false" doNotSynchronizeWithMaven="false">
+        <additionalProperties>
+          <property key="Bundle-Description" value="Archiva is an application for managing one or more remoterepositories, including administration, artifact handling,browsing and searching." />
+          <property key="Bundle-Vendor" value="The Apache Software Foundation" />
+          <property key="Bundle-DocURL" value="http://www.apache.org/" />
+          <property key="Export-Package" value="org.apache.archiva.metadata.repository.jpa;version=1.4-M4-SNAPSHOT;-split-package:=merge-first" />
+          <property key="-versionpolicy" value="[$(version;==;$(@)),$(version;+;$(@)))" />
+          <property key="Bundle-Name" value="Archiva Core Plugins :: JPA Storage for Metadata" />
+          <property key="Include-Resource" value="META-INF/persistence.xml=$MODULE_DIR$/src/main/resources/META-INF/persistence.xml,META-INF/spring-context.xml=$MODULE_DIR$/src/main/resources/META-INF/spring-context.xml" />
+        </additionalProperties>
+        <additionalJARContents />
+      </configuration>
+    </facet>
+    <facet type="Spring" name="Spring">
+      <configuration>
+        <fileset id="fileset" name="Spring Application Context" removed="false">
+          <file>file://$MODULE_DIR$/src/main/resources/META-INF/spring-context.xml</file>
+        </fileset>
+      </configuration>
+    </facet>
+    <facet type="jpa" name="JPA">
+      <configuration>
+        <setting name="validation-enabled" value="true" />
+        <setting name="provider-name" value="" />
+        <datasource-mapping>
+          <factory-entry name="archiva_pu" />
+        </datasource-mapping>
+        <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/main/resources/META-INF/persistence.xml" />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_6" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/filtered-resources" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="metadata-repository-api" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-context:3.2.2.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-aop:3.2.2.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: aopalliance:aopalliance:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-beans:3.2.2.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-core:3.2.2.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-expression:3.2.2.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: javax.inject:javax.inject:1" level="project" />
+    <orderEntry type="library" name="Maven: javax.annotation:jsr250-api:1.0" level="project" />
+    <orderEntry type="module" module-name="metadata-model" />
+    <orderEntry type="module" module-name="archiva-repository-layer" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
+    <orderEntry type="module" module-name="archiva-model" />
+    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.1" level="project" />
+    <orderEntry type="module" module-name="archiva-common" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.5" level="project" />
+    <orderEntry type="library" name="Maven: xalan:xalan:2.7.0" level="project" />
+    <orderEntry type="library" name="Maven: xml-apis:xml-apis:1.0.b2" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M2a" level="project" />
+    <orderEntry type="library" name="Maven: javax.enterprise:cdi-api:1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:14.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.sonatype.sisu:sisu-guice:no_aop:3.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.sisu:org.eclipse.sisu.inject:0.0.0.M2a" level="project" />
+    <orderEntry type="library" name="Maven: asm:asm:3.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-component-annotations:1.5.5" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-classworlds:2.4" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-utils:3.0.8" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.maven.indexer:indexer-core:5.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.maven.indexer:indexer-artifact:5.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-core:3.6.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-highlighter:3.6.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-memory:3.6.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queries:3.6.2" level="project" />
+    <orderEntry type="library" name="Maven: jakarta-regexp:jakarta-regexp:1.4" level="project" />
+    <orderEntry type="module" module-name="aether-api" />
+    <orderEntry type="module" module-name="aether-util" />
+    <orderEntry type="library" name="Maven: org.apache.maven:maven-model:3.0.5" level="project" />
+    <orderEntry type="module" module-name="log4j-jcl" scope="RUNTIME" />
+    <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.1.1" level="project" />
+    <orderEntry type="module" module-name="log4j-api" scope="RUNTIME" />
+    <orderEntry type="module" module-name="archiva-consumer-api" />
+    <orderEntry type="module" module-name="archiva-repository-admin-api" />
+    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.11" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.archiva.redback:redback-users-api:2.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.ant:ant:1.8.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.ant:ant-launcher:1.8.3" level="project" />
+    <orderEntry type="module" module-name="archiva-checksum" />
+    <orderEntry type="module" module-name="archiva-configuration" />
+    <orderEntry type="library" name="Maven: org.apache.archiva.redback.components.registry:spring-registry-api:2.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.11" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-context-support:3.2.2.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.archiva.redback.components.registry:spring-registry-commons:2.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-interpolation:1.14" level="project" />
+    <orderEntry type="library" name="Maven: commons-configuration:commons-configuration:1.9" level="project" />
+    <orderEntry type="library" name="Maven: commons-beanutils:commons-beanutils:1.8.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.archiva.redback.components:spring-utils:2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.archiva.redback.components:expression-evaluator:2.0" level="project" />
+    <orderEntry type="module" module-name="archiva-policies" />
+    <orderEntry type="library" name="Maven: org.apache.archiva.redback.components.cache:spring-cache-api:2.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.archiva.redback.components.cache:spring-cache-ehcache:2.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: net.sf.ehcache:ehcache-core:2.6.5" level="project" />
+    <orderEntry type="module" module-name="archiva-xml-tools" />
+    <orderEntry type="library" name="Maven: dom4j:dom4j:1.6.1" level="project" />
+    <orderEntry type="library" name="Maven: jaxen:jaxen:1.1" level="project" />
+    <orderEntry type="library" name="Maven: jdom:jdom:1.0" level="project" />
+    <orderEntry type="library" name="Maven: xerces:xercesImpl:2.8.1" level="project" />
+    <orderEntry type="module" module-name="archiva-maven2-metadata" />
+    <orderEntry type="module" module-name="metadata-repository-api" scope="TEST" production-on-test="" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.apache.archiva:metadata-repository-api:tests:1.4-M4-SNAPSHOT" level="project" />
+    <orderEntry type="module" module-name="archiva-test-utils" scope="TEST" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-test:3.2.2.RELEASE" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: xmlunit:xmlunit:1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.impetus.client:kundera-cassandra:2.5" level="project" />
+    <orderEntry type="library" name="Maven: com.impetus.core:kundera-core:2.5" level="project" />
+    <orderEntry type="library" name="Maven: javax.persistence:persistence-api:2.0" level="project" />
+    <orderEntry type="library" name="Maven: cglib:cglib:2.2.2" level="project" />
+    <orderEntry type="library" name="Maven: javassist:javassist:3.9.0.GA" level="project" />
+    <orderEntry type="library" name="Maven: org.hibernate:hibernate-core:4.1.7.Final" level="project" />
+    <orderEntry type="library" name="Maven: antlr:antlr:2.7.7" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.logging:jboss-logging:3.1.0.GA" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:1.0.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.hibernate.javax.persistence:hibernate-jpa-2.0-api:1.0.1.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.javassist:javassist:3.15.0-GA" level="project" />
+    <orderEntry type="library" name="Maven: org.hibernate.common:hibernate-commons-annotations:4.0.1.Final" level="project" />
+    <orderEntry type="library" name="Maven: com.thoughtworks.xstream:xstream:1.4.3" level="project" />
+    <orderEntry type="library" name="Maven: xmlpull:xmlpull:1.1.3.1" level="project" />
+    <orderEntry type="library" name="Maven: xpp3:xpp3_min:1.1.4c" level="project" />
+    <orderEntry type="library" name="Maven: com.vividsolutions:jts:1.11" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.cassandra:cassandra-thrift:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.thrift:libthrift:0.7.0" level="project" />
+    <orderEntry type="library" name="Maven: javax.servlet:servlet-api:2.5" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.2.5" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.2.4" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.6" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.cassandra:cassandra-all:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.xerial.snappy:snappy-java:1.0.4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.ning:compress-lzf:0.8.4" level="project" />
+    <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.3" level="project" />
+    <orderEntry type="library" name="Maven: org.antlr:antlr:3.2" level="project" />
+    <orderEntry type="library" name="Maven: org.antlr:antlr-runtime:3.2" level="project" />
+    <orderEntry type="library" name="Maven: org.antlr:stringtemplate:3.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.cassandra.deps:avro:1.4.0-cassandra-1" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.4.0" level="project" />
+    <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty:6.1.22" level="project" />
+    <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty-util:6.1.22" level="project" />
+    <orderEntry type="library" name="Maven: org.mortbay.jetty:servlet-api:2.5-20081211" level="project" />
+    <orderEntry type="library" name="Maven: jline:jline:1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.stephenc.high-scale-lib:high-scale-lib:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.6" level="project" />
+    <orderEntry type="library" name="Maven: edu.stanford.ppl:snaptree:0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.yammer.metrics:metrics-core:2.0.3" level="project" />
+    <orderEntry type="library" name="Maven: com.github.stephenc:jamm:0.2.5" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.cassandra:cassandra-clientutil:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.netty:netty:3.2.8.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.scale7:scale7-pelops:1.3-1.1.x" level="project" />
+    <orderEntry type="library" name="Maven: com.eaio.uuid:uuid:3.2" level="project" />
+    <orderEntry type="library" name="Maven: org.scale7:scale7-core:1.3" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: commons-pool:commons-pool:1.6" level="project" />
+    <orderEntry type="library" name="Maven: org.xerial:snappy:1.0.1-rc4" level="project" />
+    <orderEntry type="library" name="Maven: net.dataforte.cassandra:cassandra-connection-pool:0.7.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.easytesting:fest-assert-core:2.0M8" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.easytesting:fest-util:1.2.3" level="project" />
+    <orderEntry type="module" module-name="log4j-slf4j-impl" scope="TEST" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:slf4j-ext:1.7.5" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: ch.qos.cal10n:cal10n-api:0.7.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.easymock:easymock:2.5.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.easymock:easymockclassextension:2.5" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: cglib:cglib-nodep:2.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.objenesis:objenesis:1.2" level="project" />
+  </component>
+</module>
+
