@@ -1,5 +1,6 @@
 package org.apache.archiva.metadata.repository.jpa.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -14,12 +15,18 @@ import java.util.List;
  * @author Olivier Lamy
  */
 @Entity
-@Table( name = "repositories", schema = "metadata@archiva" )
+@Table( name = "repositories", schema = "ArchivaKeySpace@archiva" )
 public class Repository
     implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     private String id;
+
+    @Column(name = "name")
+    private String name;
 
     @OneToMany( fetch = FetchType.EAGER )
     private List<Namespace> namespaces = new ArrayList<Namespace>();
@@ -32,6 +39,7 @@ public class Repository
     public Repository( String id )
     {
         this.id = id;
+        this.name = id;
     }
 
     public String getId()
@@ -44,6 +52,16 @@ public class Repository
         this.id = id;
     }
 
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
     public List<Namespace> getNamespaces()
     {
         return namespaces;
@@ -53,4 +71,6 @@ public class Repository
     {
         this.namespaces = namespaces;
     }
+
+
 }

@@ -24,10 +24,10 @@
 
   <bean id="achillesEntityManagerFactory" class="info.archinnov.achilles.integration.spring.ThriftEntityManagerFactoryBean"
         init-method="initialize">
-    <property name="entityPackages" value="my.package1,my.package2"/>
+    <property name="entityPackages" value="org.apache.archiva.metadata.repository.jpa.model"/>
     <property name="cassandraHost" value="localhost:9160"/>
-    <property name="clusterName" value="Test Cluster"/>
-    <property name="keyspaceName" value="Test Keyspace"/>
+    <property name="clusterName" value="ArchivaCluster"/>
+    <property name="keyspaceName" value="ArchivaKeySpace"/>
     <property name="forceColumnFamilyCreation" value="true" />
   </bean>
 
