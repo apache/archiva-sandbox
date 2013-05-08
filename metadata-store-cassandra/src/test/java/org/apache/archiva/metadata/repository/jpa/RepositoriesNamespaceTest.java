@@ -1,10 +1,5 @@
 package org.apache.archiva.metadata.repository.jpa;
 
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.factory.HFactory;
-import me.prettyprint.hom.EntityManagerImpl;
 import org.apache.archiva.metadata.repository.jpa.model.Repository;
 import org.apache.archiva.test.utils.ArchivaSpringJUnit4ClassRunner;
 import org.fest.assertions.api.Assertions;
@@ -17,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import java.util.List;
