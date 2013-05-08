@@ -83,6 +83,7 @@
         <!-- FIXME -->
         <!-- due to some instanceof in kundera it's mandatory -->
         <!-- must be excluded to prevent gpl here -->
+        <!-- depend on this pull request accepted https://github.com/impetus-opensource/Kundera/pull/259 -->
         <exclusion>
           <groupId>org.hibernate</groupId>
           <artifactId>hibernate-core</artifactId>
