@@ -19,38 +19,101 @@ package org.apache.archiva.metadata.repository.jpa;
  * under the License.
  */
 
+import org.apache.archiva.configuration.ArchivaConfiguration;
 import org.apache.archiva.metadata.model.ArtifactMetadata;
 import org.apache.archiva.metadata.model.MetadataFacet;
+import org.apache.archiva.metadata.model.MetadataFacetFactory;
 import org.apache.archiva.metadata.model.ProjectMetadata;
 import org.apache.archiva.metadata.model.ProjectVersionMetadata;
 import org.apache.archiva.metadata.model.ProjectVersionReference;
 import org.apache.archiva.metadata.repository.MetadataRepository;
 import org.apache.archiva.metadata.repository.MetadataRepositoryException;
 import org.apache.archiva.metadata.repository.MetadataResolutionException;
+import org.apache.archiva.metadata.repository.jpa.model.Namespace;
+import org.apache.archiva.metadata.repository.jpa.model.Repository;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Olivier Lamy
  */
-public class JpaMetadataRepository
+public class CassandraMetadataRepository
     implements MetadataRepository
 {
+
+    private EntityManager entityManager;
+
+    private ArchivaConfiguration configuration;
+
+    private final Map<String, MetadataFacetFactory> metadataFacetFactories;
+
+    public CassandraMetadataRepository( Map<String, MetadataFacetFactory> metadataFacetFactories,
+                                        ArchivaConfiguration configuration, EntityManager entityManager )
+    {
+        this.metadataFacetFactories = metadataFacetFactories;
+        this.configuration = configuration;
+        this.entityManager = entityManager;
+    }
 
     @Override
     public void updateNamespace( String repositoryId, String namespace )
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Repository repository = this.entityManager.find( Repository.class, repositoryId );
+
+        if ( repository == null )
+        {
+            repository = new Repository( repositoryId );
+            this.entityManager.persist( repository );
+            Namespace n = new Namespace( namespace );
+            n.setRepository( repository );
+            this.entityManager.persist( n );
+            repository.getNamespaces().add( n );
+            this.entityManager.persist( repository );
+        }
+        else
+        {
+
+            Namespace n = new Namespace( namespace );
+            // contains the namespace ?
+            if ( !repository.getNamespaces().contains( n ) )
+            {
+                entityManager.persist( n );
+                repository.getNamespaces().add( n );
+                entityManager.merge( repository );
+
+            }
+        }
+
+
     }
 
     @Override
     public void removeNamespace( String repositoryId, String namespace )
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        TypedQuery<Namespace> typedQuery =
+            this.entityManager.createQuery( "select n from namespace n where n.id=:id and n.repository.id=:repoid",
+                                            Namespace.class );
+
+        typedQuery = typedQuery.setParameter( "id", namespace ).setParameter( "repoid", repositoryId );
+
+        Namespace n = typedQuery.getSingleResult();
+
+        if ( n != null )
+        {
+
+        }
+        this.entityManager.remove( n );
     }
 
     @Override
@@ -182,7 +245,6 @@ public class JpaMetadataRepository
     {
         //To change body of implemented methods use File | Settings | File Templates.
     }
-
 
 
     @Override

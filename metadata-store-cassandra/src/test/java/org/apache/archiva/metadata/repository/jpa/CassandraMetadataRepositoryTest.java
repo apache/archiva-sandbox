@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * @author Olivier Lamy
  */
-public class JpaMetadataRepositoryTest
+public class CassandraMetadataRepositoryTest
     extends AbstractMetadataRepositoryTest
 {
 

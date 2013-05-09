@@ -19,9 +19,17 @@ package org.apache.archiva.metadata.repository.jpa.model;
  * under the License.
  */
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 
@@ -38,10 +46,15 @@ public class Namespace
     private static final long serialVersionUID = 1L;
 
     @Id
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
-    @Column(name = "name")
+    @Column(name = "NAME")
     private String name;
+
+    @OneToOne(targetEntity = Repository.class, fetch = FetchType.EAGER)
+    private Repository repository;
+
 
     public Namespace()
     {
@@ -72,5 +85,44 @@ public class Namespace
     public void setName( String name )
     {
         this.name = name;
+    }
+
+
+    public Repository getRepository()
+    {
+        return repository;
+    }
+
+    public void setRepository( Repository repository )
+    {
+        this.repository = repository;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o )
+        {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() )
+        {
+            return false;
+        }
+
+        Namespace namespace = (Namespace) o;
+
+        if ( !id.equals( namespace.id ) )
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return id.hashCode();
     }
 }

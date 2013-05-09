@@ -19,6 +19,7 @@ package org.apache.archiva.metadata.repository.jpa;
  * under the License.
  */
 
+import org.apache.archiva.metadata.repository.jpa.model.Namespace;
 import org.apache.archiva.metadata.repository.jpa.model.Repository;
 import org.apache.archiva.test.utils.ArchivaSpringJUnit4ClassRunner;
 import org.fest.assertions.api.Assertions;
@@ -30,40 +31,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Olivier Lamy
  */
-@RunWith( ArchivaSpringJUnit4ClassRunner.class )
-@ContextConfiguration( locations = { "classpath*:/META-INF/spring-context.xml", "classpath*:/spring-context.xml" } )
+@RunWith(ArchivaSpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath*:/META-INF/spring-context.xml", "classpath*:/spring-context.xml" })
 public class RepositoriesNamespaceTest
 {
 
-    private static Logger LOGGER = LoggerFactory.getLogger( RepositoriesNamespaceTest.class );
+    private Logger logger = LoggerFactory.getLogger( getClass() );
 
     //@Inject
     //private ThriftEntityManager em;
     //EntityManagerImpl em;
+
+    @Inject
+    @Named( value = "archivaEntityManagerFactory#jpa-archiva" )
+    ArchivaEntityManagerFactory archivaEntityManagerFactory;
+
     EntityManager em;
 
     @Before
     public void setup()
         throws Exception
     {
-        LOGGER.info( "setup" );
-        //CassandraHostConfigurator hostConfigurator = new CassandraHostConfigurator( "localhost:9160" );
-        //Cluster cluster = HFactory.getOrCreateCluster( "ArchivaCluster", hostConfigurator );
-        //Keyspace keyspace = HFactory.createKeyspace( "ArchivaKeySpace", cluster );
-        //em = new EntityManagerImpl( keyspace, "org.apache.archiva.metadata.repository.jpa.model" );
-        em = Persistence.createEntityManagerFactory("archiva", new Properties( )).createEntityManager();
-
-        LOGGER.info( "end setup" );
-
+        em = archivaEntityManagerFactory.getEntityManager();
     }
 
     @After
@@ -75,36 +74,105 @@ public class RepositoriesNamespaceTest
     }
 
     @Test
-    public void addRepositories()
+    public void quicktest()
         throws Exception
     {
-        Repository repo1 = new Repository( "releases" );
+        try
+        {
+            em.clear();
 
-        em.persist( repo1 );
+            Repository repoReleases = new Repository( "releases" );
 
-        Repository repo2 = new Repository( "snapshots" );
+            em.persist( repoReleases );
 
-        em.persist( repo2 );
+            Repository repoSnapshots = new Repository( "snapshots" );
 
-        //em.flush();
+            em.persist( repoSnapshots );
 
-        Repository repositoryFromData = em.find( Repository.class, "releases" );
+            Repository repositoryFromData = em.find( Repository.class, "releases" );
 
-        Assertions.assertThat( repositoryFromData ).isNotNull();
-        Assertions.assertThat( repositoryFromData.getName() ).isEqualTo( "releases" );
+            Assertions.assertThat( repositoryFromData ).isNotNull();
+            Assertions.assertThat( repositoryFromData.getName() ).isEqualTo( "releases" );
 
-        repositoryFromData = em.find( Repository.class, "snapshots" );
+            repositoryFromData = em.find( Repository.class, "snapshots" );
 
-        Assertions.assertThat( repositoryFromData ).isNotNull();
-        Assertions.assertThat( repositoryFromData.getId() ).isEqualTo( "snapshots" );
+            Assertions.assertThat( repositoryFromData ).isNotNull();
+            Assertions.assertThat( repositoryFromData.getId() ).isEqualTo( "snapshots" );
 
-        //em.clear();
+            //em.clear();
 
-        Query query = em.createQuery( "SELECT r FROM Repository r" );
+            TypedQuery<Repository> query = em.createQuery( "SELECT r FROM Repository r", Repository.class );
 
-        List<Repository> repositories = query.getResultList();
+            List<Repository> repositories = query.getResultList();
 
-        Assertions.assertThat( repositories ).isNotNull().isNotEmpty().hasSize( 2 );
+            Assertions.assertThat( repositories ).isNotNull().isNotEmpty().hasSize( 2 );
 
+            Namespace namespace = new Namespace( "org" );
+            namespace.setRepository( repoReleases );
+
+            repoReleases.getNamespaces().add( namespace );
+
+            em.persist( namespace );
+
+            em.merge( repoReleases );
+
+            repositoryFromData = em.find( Repository.class, "releases" );
+
+            Assertions.assertThat( repositoryFromData ).isNotNull();
+            Assertions.assertThat( repositoryFromData.getName() ).isEqualTo( "releases" );
+            Assertions.assertThat( repositoryFromData.getNamespaces() ).isNotNull().isNotEmpty().hasSize( 1 );
+
+            namespace = em.find( Namespace.class, "org" );
+            Assertions.assertThat( namespace ).isNotNull();
+            Assertions.assertThat( namespace.getRepository() ).isNotNull();
+
+        }
+        finally
+        {
+            clearReposAndNamespace();
+        }
+
+    }
+
+    @Test
+    public void testMetadataRepo()
+        throws Exception
+    {
+        try
+        {
+            CassandraMetadataRepository cmr = new CassandraMetadataRepository( null, null, em );
+
+            cmr.updateNamespace( "release", "org" );
+
+            Repository r = em.find( Repository.class, "release" );
+
+            Assertions.assertThat( r ).isNotNull();
+            Assertions.assertThat( r.getNamespaces() ).isNotEmpty().hasSize( 1 );
+
+            Namespace n = em.find( Namespace.class, "org" );
+
+            Assertions.assertThat( n ).isNotNull();
+            Assertions.assertThat( n.getRepository() ).isNotNull();
+        }
+        finally
+        {
+            clearReposAndNamespace();
+        }
+    }
+
+    protected void clearReposAndNamespace()
+        throws Exception
+    {
+        TypedQuery<Namespace> query = em.createQuery( "SELECT n FROM Namespace n", Namespace.class );
+        for ( Namespace n : query.getResultList() )
+        {
+            em.remove( n );
+        }
+
+        TypedQuery<Repository> queryR = em.createQuery( "SELECT r FROM Repository r", Repository.class );
+        for ( Repository r : queryR.getResultList() )
+        {
+            em.remove( r );
+        }
     }
 }

@@ -19,10 +19,16 @@ package org.apache.archiva.metadata.repository.jpa.model;
  * under the License.
  */
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -42,12 +48,13 @@ public class Repository
     private static final long serialVersionUID = 1L;
 
     @Id
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
-    @Column(name = "name")
+    @Column( name = "NAME" )
     private String name;
 
-    @OneToMany( fetch = FetchType.EAGER )
+    @OneToMany(targetEntity = Namespace.class, fetch = FetchType.EAGER)
     private List<Namespace> namespaces = new ArrayList<Namespace>();
 
     public Repository()
@@ -83,6 +90,10 @@ public class Repository
 
     public List<Namespace> getNamespaces()
     {
+        if ( this.namespaces == null )
+        {
+            this.namespaces = new ArrayList<Namespace>();
+        }
         return namespaces;
     }
 
@@ -91,5 +102,31 @@ public class Repository
         this.namespaces = namespaces;
     }
 
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o )
+        {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() )
+        {
+            return false;
+        }
 
+        Repository that = (Repository) o;
+
+        if ( !id.equals( that.id ) )
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return id.hashCode();
+    }
 }
