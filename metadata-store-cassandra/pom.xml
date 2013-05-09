@@ -36,12 +36,12 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.archiva</groupId>
-      <artifactId>metadata-repository-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.archiva</groupId>
+      <artifactId>metadata-repository-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.archiva</groupId>
@@ -80,10 +80,6 @@
           <groupId>javax.transaction</groupId>
           <artifactId>jta</artifactId>
         </exclusion>
-        <!-- FIXME -->
-        <!-- due to some instanceof in kundera it's mandatory -->
-        <!-- must be excluded to prevent gpl here -->
-        <!-- depend on this pull request accepted https://github.com/impetus-opensource/Kundera/pull/259 -->
         <exclusion>
           <groupId>org.hibernate</groupId>
           <artifactId>hibernate-core</artifactId>
@@ -136,6 +132,11 @@
       <artifactId>jackson-mapper-asl</artifactId>
       <scope>test</scope>
     </dependency>
+    <!--dependency>
+      <groupId>org.apache.archiva</groupId>
+      <artifactId>maven2-repository</artifactId>
+      <scope>test</scope>
+    </dependency-->
   </dependencies>
   <build>
     <testResources>
