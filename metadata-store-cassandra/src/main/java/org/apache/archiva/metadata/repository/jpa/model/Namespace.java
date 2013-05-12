@@ -20,6 +20,7 @@ package org.apache.archiva.metadata.repository.jpa.model;
  */
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
@@ -38,7 +39,7 @@ import java.io.Serializable;
  * @author Olivier Lamy
  */
 @Entity
-@Table( name = "namespaces", schema = "ArchivaKeySpace@archiva")
+@Table( name = "namespace", schema = "ArchivaKeySpace@archiva")
 public class Namespace
     implements Serializable
 {
@@ -47,12 +48,14 @@ public class Namespace
 
     @Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "namespace_id")
     private String id;
 
     @Column(name = "NAME")
     private String name;
 
-    @OneToOne(targetEntity = Repository.class, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "repository_id")
     private Repository repository;
 
 
@@ -124,5 +127,16 @@ public class Namespace
     public int hashCode()
     {
         return id.hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder sb = new StringBuilder( "Namespace{" );
+        sb.append( "id='" ).append( id ).append( '\'' );
+        sb.append( ", name='" ).append( name ).append( '\'' );
+        sb.append( ", repository=" ).append( repository );
+        sb.append( '}' );
+        return sb.toString();
     }
 }

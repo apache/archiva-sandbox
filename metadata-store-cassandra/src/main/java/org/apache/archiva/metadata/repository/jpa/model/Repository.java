@@ -40,7 +40,7 @@ import java.util.List;
  * @author Olivier Lamy
  */
 @Entity
-@Table( name = "repositories", schema = "ArchivaKeySpace@archiva" )
+@Table(name = "repository", schema = "ArchivaKeySpace@archiva")
 public class Repository
     implements Serializable
 {
@@ -49,12 +49,13 @@ public class Repository
 
     @Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column( name = "repository_id" )
     private String id;
 
-    @Column( name = "NAME" )
+    @Column(name = "name")
     private String name;
 
-    @OneToMany(targetEntity = Namespace.class, fetch = FetchType.EAGER)
+    @OneToMany( fetch = FetchType.EAGER, mappedBy = "repository" )
     private List<Namespace> namespaces = new ArrayList<Namespace>();
 
     public Repository()
@@ -128,5 +129,17 @@ public class Repository
     public int hashCode()
     {
         return id.hashCode();
+    }
+
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder sb = new StringBuilder( "Repository{" );
+        sb.append( "id='" ).append( id ).append( '\'' );
+        sb.append( ", name='" ).append( name ).append( '\'' );
+        sb.append( ", namespaces=" ).append( namespaces );
+        sb.append( '}' );
+        return sb.toString();
     }
 }

@@ -65,7 +65,7 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public void updateNamespace( String repositoryId, String namespace )
+    public void updateNamespace( String repositoryId, String namespaceId )
         throws MetadataRepositoryException
     {
         Repository repository = this.entityManager.find( Repository.class, repositoryId );
@@ -73,28 +73,25 @@ public class CassandraMetadataRepository
         if ( repository == null )
         {
             repository = new Repository( repositoryId );
+
+            Namespace namespace = new Namespace( namespaceId );
+            namespace.setRepository( repository );
+            repository.getNamespaces().add( namespace );
             this.entityManager.persist( repository );
-            Namespace n = new Namespace( namespace );
-            n.setRepository( repository );
-            this.entityManager.persist( n );
-            repository.getNamespaces().add( n );
-            this.entityManager.persist( repository );
+            this.entityManager.persist( namespace );
         }
         else
         {
 
-            Namespace n = new Namespace( namespace );
+            Namespace namespace = new Namespace( namespaceId );
             // contains the namespace ?
-            if ( !repository.getNamespaces().contains( n ) )
+            if ( !repository.getNamespaces().contains( namespace ) )
             {
-                entityManager.persist( n );
-                repository.getNamespaces().add( n );
+                entityManager.persist( namespace );
+                repository.getNamespaces().add( namespace );
                 entityManager.merge( repository );
-
             }
         }
-
-
     }
 
     @Override
