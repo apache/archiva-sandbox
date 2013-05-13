@@ -84,12 +84,14 @@ public class CassandraMetadataRepository
         {
 
             Namespace namespace = new Namespace( namespaceId );
+            namespace.setRepository( repository );
+            entityManager.persist( namespace );
             // contains the namespace ?
             if ( !repository.getNamespaces().contains( namespace ) )
             {
-                entityManager.persist( namespace );
                 repository.getNamespaces().add( namespace );
                 entityManager.merge( repository );
+                entityManager.persist( namespace );
             }
         }
     }

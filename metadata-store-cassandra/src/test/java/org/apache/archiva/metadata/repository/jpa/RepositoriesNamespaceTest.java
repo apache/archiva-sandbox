@@ -25,6 +25,7 @@ import org.apache.archiva.test.utils.ArchivaSpringJUnit4ClassRunner;
 import org.fest.assertions.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -73,7 +74,8 @@ public class RepositoriesNamespaceTest
         //emf.close();
     }
 
-    @Test
+    //@Test
+    @Ignore
     public void quicktest()
         throws Exception
     {
@@ -140,9 +142,9 @@ public class RepositoriesNamespaceTest
     {
         Repository r = null;
         Namespace n = null;
+        CassandraMetadataRepository cmr = new CassandraMetadataRepository( null, null, em );
         try
         {
-            CassandraMetadataRepository cmr = new CassandraMetadataRepository( null, null, em );
 
             cmr.updateNamespace( "release", "org" );
 
@@ -155,11 +157,17 @@ public class RepositoriesNamespaceTest
 
             Assertions.assertThat( n ).isNotNull();
             Assertions.assertThat( n.getRepository() ).isNotNull();
+
+            cmr.updateNamespace( "release", "org.apache" );
+
+            r = em.find( Repository.class, "release" );
+
+            Assertions.assertThat( r ).isNotNull();
+            Assertions.assertThat( r.getNamespaces() ).isNotEmpty().hasSize( 2 );
+
         }
         finally
         {
-            //em.remove( r );
-            //em.remove( n );
             clearReposAndNamespace();
         }
     }
