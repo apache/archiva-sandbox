@@ -59,7 +59,7 @@ public class Namespace
     @NoSqlIndexed
     private String name;
 
-    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, targetEntity = Repository.class)
+    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     @JoinColumn(name = "repository_id")
     @NoSqlManyToOne(columnName = "repository_id")
     private Repository repository;

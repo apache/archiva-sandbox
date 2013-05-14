@@ -60,8 +60,7 @@ public class Repository
     @NoSqlIndexed
     private String name;
 
-    @OneToMany( fetch = FetchType.EAGER, mappedBy = "namespace", targetEntity = Namespace.class)
-    @JoinColumn(name = "repository_id",table = "namespace")
+    @OneToMany( fetch = FetchType.EAGER, mappedBy = "namespace")
     @NoSqlOneToMany(columnName = "repository_id")
     private List<Namespace> namespaces = new ArrayList<Namespace>();
 
