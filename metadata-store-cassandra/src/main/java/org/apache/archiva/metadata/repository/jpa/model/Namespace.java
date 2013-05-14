@@ -19,6 +19,10 @@ package org.apache.archiva.metadata.repository.jpa.model;
  * under the License.
  */
 
+import com.alvazan.orm.api.base.anno.NoSqlId;
+import com.alvazan.orm.api.base.anno.NoSqlIndexed;
+import com.alvazan.orm.api.base.anno.NoSqlManyToOne;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -47,15 +51,17 @@ public class Namespace
     private static final long serialVersionUID = 1L;
 
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "namespace_id")
+    @NoSqlId
+    @Column(name = "id")
     private String id;
 
-    @Column(name = "NAME")
+    @Column(name = "name")
+    @NoSqlIndexed
     private String name;
 
-    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, targetEntity = Repository.class)
     @JoinColumn(name = "repository_id")
+    @NoSqlManyToOne(columnName = "repository_id")
     private Repository repository;
 
 
@@ -63,6 +69,7 @@ public class Namespace
     {
         // no op
     }
+
 
     public Namespace( String id )
     {

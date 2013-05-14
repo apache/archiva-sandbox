@@ -31,13 +31,17 @@ import org.apache.archiva.metadata.repository.MetadataRepositoryException;
 import org.apache.archiva.metadata.repository.MetadataResolutionException;
 import org.apache.archiva.metadata.repository.jpa.model.Namespace;
 import org.apache.archiva.metadata.repository.jpa.model.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +53,8 @@ import java.util.Properties;
 public class CassandraMetadataRepository
     implements MetadataRepository
 {
+
+    private Logger logger = LoggerFactory.getLogger( getClass() );
 
     private EntityManager entityManager;
 
@@ -76,7 +82,7 @@ public class CassandraMetadataRepository
 
             Namespace namespace = new Namespace( namespaceId );
             namespace.setRepository( repository );
-            repository.getNamespaces().add( namespace );
+            //repository.getNamespaces().add( namespace );
             this.entityManager.persist( repository );
             this.entityManager.persist( namespace );
         }
@@ -87,12 +93,14 @@ public class CassandraMetadataRepository
             namespace.setRepository( repository );
             entityManager.persist( namespace );
             // contains the namespace ?
+            /*
             if ( !repository.getNamespaces().contains( namespace ) )
             {
                 repository.getNamespaces().add( namespace );
                 entityManager.merge( repository );
                 entityManager.persist( namespace );
             }
+            */
         }
     }
 
@@ -108,11 +116,35 @@ public class CassandraMetadataRepository
 
         Namespace n = typedQuery.getSingleResult();
 
-        if ( n != null )
-        {
-
-        }
         this.entityManager.remove( n );
+    }
+
+    @Override
+    public void removeRepository( String repositoryId )
+        throws MetadataRepositoryException
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public Collection<String> getRepositories()
+        throws MetadataRepositoryException
+    {
+        logger.debug( "getRepositories" );
+        TypedQuery<Repository> typedQuery = entityManager.createQuery( "select r from Repository r", Repository.class );
+        List<Repository> repositories = typedQuery.getResultList();
+        if ( repositories == null )
+        {
+            return Collections.emptyList();
+        }
+        List<String> repoIds = new ArrayList<String>( repositories.size() );
+        for ( Repository repository : repositories )
+        {
+            repoIds.add( repository.getName() );
+        }
+        logger.debug( "getRepositories found: {}", repoIds );
+        return repoIds;
+
     }
 
     @Override
@@ -127,6 +159,33 @@ public class CassandraMetadataRepository
         throws MetadataResolutionException
     {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+
+    public List<String> getNamespaces( String repoId )
+        throws MetadataResolutionException
+    {
+        logger.debug( "getNamespaces for repository '{}'", repoId );
+        //TypedQuery<Repository> typedQuery =
+        //    entityManager.createQuery( "select n from Namespace n where n.repository_id=:id", Namespace.class );
+
+        //List<Repository> namespaces = typedQuery.setParameter( "id", repoId ).getResultList();
+
+        Repository repository = entityManager.find( Repository.class, repoId );
+
+        if ( repository == null || repository.getNamespaces().isEmpty())
+        {
+            return Collections.emptyList();
+        }
+        List<String> namespaceIds = new ArrayList<String>( repository.getNamespaces().size() );
+
+        for ( Namespace n : repository.getNamespaces() )
+        {
+            namespaceIds.add( n.getName() );
+        }
+
+        logger.debug( "getNamespaces for repository '{}' found {}", repoId, namespaceIds.size() );
+        return namespaceIds;
     }
 
 
@@ -203,13 +262,6 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public Collection<String> getRepositories()
-        throws MetadataRepositoryException
-    {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public List<ArtifactMetadata> getArtifactsByChecksum( String repositoryId, String checksum )
         throws MetadataRepositoryException
     {
@@ -233,13 +285,6 @@ public class CassandraMetadataRepository
     @Override
     public void removeArtifact( String repositoryId, String namespace, String project, String version,
                                 MetadataFacet metadataFacet )
-        throws MetadataRepositoryException
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void removeRepository( String repositoryId )
         throws MetadataRepositoryException
     {
         //To change body of implemented methods use File | Settings | File Templates.

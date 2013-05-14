@@ -22,6 +22,7 @@ package org.apache.archiva.metadata.repository.jpa;
 import org.apache.archiva.metadata.repository.jpa.model.Namespace;
 import org.apache.archiva.metadata.repository.jpa.model.Repository;
 import org.apache.archiva.test.utils.ArchivaSpringJUnit4ClassRunner;
+import org.apache.cassandra.dht.BootStrapper;
 import org.fest.assertions.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -59,11 +60,14 @@ public class RepositoriesNamespaceTest
 
     EntityManager em;
 
+    CassandraMetadataRepository cmr;
+
     @Before
     public void setup()
         throws Exception
     {
         em = archivaEntityManagerFactory.getEntityManager();
+        cmr = new CassandraMetadataRepository( null, null, em );
     }
 
     @After
@@ -74,75 +78,15 @@ public class RepositoriesNamespaceTest
         //emf.close();
     }
 
-    //@Test
-    @Ignore
-    public void quicktest()
-        throws Exception
-    {
-        try
-        {
-            em.clear();
-
-            Repository repoReleases = new Repository( "releases" );
-
-            em.persist( repoReleases );
-
-            Repository repoSnapshots = new Repository( "snapshots" );
-
-            em.persist( repoSnapshots );
-
-            Repository repositoryFromData = em.find( Repository.class, "releases" );
-
-            Assertions.assertThat( repositoryFromData ).isNotNull();
-            Assertions.assertThat( repositoryFromData.getName() ).isEqualTo( "releases" );
-
-            repositoryFromData = em.find( Repository.class, "snapshots" );
-
-            Assertions.assertThat( repositoryFromData ).isNotNull();
-            Assertions.assertThat( repositoryFromData.getId() ).isEqualTo( "snapshots" );
-
-            //em.clear();
-
-            TypedQuery<Repository> query = em.createQuery( "SELECT r FROM Repository r", Repository.class );
-
-            List<Repository> repositories = query.getResultList();
-
-            Assertions.assertThat( repositories ).isNotNull().isNotEmpty().hasSize( 2 );
-
-            Namespace namespace = new Namespace( "org" );
-            namespace.setRepository( repoReleases );
-
-            repoReleases.getNamespaces().add( namespace );
-
-            em.persist( namespace );
-
-            em.persist( repoReleases );
-
-            repositoryFromData = em.find( Repository.class, "releases" );
-
-            Assertions.assertThat( repositoryFromData ).isNotNull();
-            Assertions.assertThat( repositoryFromData.getName() ).isEqualTo( "releases" );
-            //Assertions.assertThat( repositoryFromData.getNamespaces() ).isNotNull().isNotEmpty().hasSize( 1 );
-
-            namespace = em.find( Namespace.class, "org" );
-            Assertions.assertThat( namespace ).isNotNull();
-            Assertions.assertThat( namespace.getRepository() ).isNotNull();
-
-        }
-        finally
-        {
-            clearReposAndNamespace();
-        }
-
-    }
 
     @Test
     public void testMetadataRepo()
         throws Exception
     {
+        //com.alvazan.orm.api.base.Bootstrap.create( null ).createEntityManager().
         Repository r = null;
         Namespace n = null;
-        CassandraMetadataRepository cmr = new CassandraMetadataRepository( null, null, em );
+
         try
         {
 
@@ -151,7 +95,9 @@ public class RepositoriesNamespaceTest
             r = em.find( Repository.class, "release" );
 
             Assertions.assertThat( r ).isNotNull();
-            Assertions.assertThat( r.getNamespaces() ).isNotEmpty().hasSize( 1 );
+
+            Assertions.assertThat( cmr.getRepositories()).isNotEmpty().hasSize( 1 );
+            Assertions.assertThat( cmr.getNamespaces( "release" ) ).isNotEmpty().hasSize( 1 );
 
             n = em.find( Namespace.class, "org" );
 
@@ -163,7 +109,7 @@ public class RepositoriesNamespaceTest
             r = em.find( Repository.class, "release" );
 
             Assertions.assertThat( r ).isNotNull();
-            Assertions.assertThat( r.getNamespaces() ).isNotEmpty().hasSize( 2 );
+            Assertions.assertThat( cmr.getNamespaces( "release" ) ).isNotEmpty().hasSize( 2 );
 
         }
         finally

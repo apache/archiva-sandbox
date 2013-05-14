@@ -19,6 +19,10 @@ package org.apache.archiva.metadata.repository.jpa.model;
  * under the License.
  */
 
+import com.alvazan.orm.api.base.anno.NoSqlId;
+import com.alvazan.orm.api.base.anno.NoSqlIndexed;
+import com.alvazan.orm.api.base.anno.NoSqlOneToMany;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,14 +52,17 @@ public class Repository
     private static final long serialVersionUID = 1L;
 
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column( name = "repository_id" )
+    @NoSqlId
+    @Column( name = "id" )
     private String id;
 
     @Column(name = "name")
+    @NoSqlIndexed
     private String name;
 
-    @OneToMany( fetch = FetchType.EAGER, mappedBy = "repository" )
+    @OneToMany( fetch = FetchType.EAGER, mappedBy = "namespace", targetEntity = Namespace.class)
+    @JoinColumn(name = "repository_id",table = "namespace")
+    @NoSqlOneToMany(columnName = "repository_id")
     private List<Namespace> namespaces = new ArrayList<Namespace>();
 
     public Repository()
@@ -88,6 +95,7 @@ public class Repository
     {
         this.name = name;
     }
+
 
     public List<Namespace> getNamespaces()
     {
@@ -138,7 +146,7 @@ public class Repository
         final StringBuilder sb = new StringBuilder( "Repository{" );
         sb.append( "id='" ).append( id ).append( '\'' );
         sb.append( ", name='" ).append( name ).append( '\'' );
-        sb.append( ", namespaces=" ).append( namespaces );
+        //sb.append( ", namespaces=" ).append( namespaces );
         sb.append( '}' );
         return sb.toString();
     }
