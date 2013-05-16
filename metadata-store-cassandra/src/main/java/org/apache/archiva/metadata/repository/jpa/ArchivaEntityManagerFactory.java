@@ -19,6 +19,8 @@ package org.apache.archiva.metadata.repository.jpa;
  * under the License.
  */
 
+import com.netflix.astyanax.Keyspace;
+
 import javax.persistence.EntityManager;
 
 /**
@@ -27,4 +29,7 @@ import javax.persistence.EntityManager;
 public interface ArchivaEntityManagerFactory
 {
     EntityManager getEntityManager();
+
+    Keyspace getKeyspace();
+
 }

@@ -22,11 +22,9 @@ package org.apache.archiva.metadata.repository.jpa;
 import org.apache.archiva.metadata.repository.jpa.model.Namespace;
 import org.apache.archiva.metadata.repository.jpa.model.Repository;
 import org.apache.archiva.test.utils.ArchivaSpringJUnit4ClassRunner;
-import org.apache.cassandra.dht.BootStrapper;
 import org.fest.assertions.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -35,10 +33,6 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import java.util.List;
 
 /**
  * @author Olivier Lamy
@@ -58,7 +52,6 @@ public class RepositoriesNamespaceTest
     @Named( value = "archivaEntityManagerFactory#jpa-archiva" )
     ArchivaEntityManagerFactory archivaEntityManagerFactory;
 
-    EntityManager em;
 
     CassandraMetadataRepository cmr;
 
@@ -66,8 +59,9 @@ public class RepositoriesNamespaceTest
     public void setup()
         throws Exception
     {
-        em = archivaEntityManagerFactory.getEntityManager();
-        cmr = new CassandraMetadataRepository( null, null, em );
+
+        cmr = new CassandraMetadataRepository( null, null, null, archivaEntityManagerFactory.getKeyspace() );
+
     }
 
     @After
@@ -83,7 +77,7 @@ public class RepositoriesNamespaceTest
     public void testMetadataRepo()
         throws Exception
     {
-        //com.alvazan.orm.api.base.Bootstrap.create( null ).createEntityManager().
+
         Repository r = null;
         Namespace n = null;
 
@@ -92,25 +86,29 @@ public class RepositoriesNamespaceTest
 
             cmr.updateNamespace( "release", "org" );
 
-            r = em.find( Repository.class, "release" );
+            r = cmr.getRepositoryEntityManager().get( "release" );
 
             Assertions.assertThat( r ).isNotNull();
 
-            Assertions.assertThat( cmr.getRepositories()).isNotEmpty().hasSize( 1 );
+            Assertions.assertThat( cmr.getRepositories() ).isNotEmpty().hasSize( 1 );
             Assertions.assertThat( cmr.getNamespaces( "release" ) ).isNotEmpty().hasSize( 1 );
 
-            n = em.find( Namespace.class, "org" );
+            n = cmr.getNamespaceEntityManager().get( "org" + "-" + "release" );
 
             Assertions.assertThat( n ).isNotNull();
             Assertions.assertThat( n.getRepository() ).isNotNull();
 
             cmr.updateNamespace( "release", "org.apache" );
 
-            r = em.find( Repository.class, "release" );
+            r = cmr.getRepositoryEntityManager().get( "release" );
 
             Assertions.assertThat( r ).isNotNull();
             Assertions.assertThat( cmr.getNamespaces( "release" ) ).isNotEmpty().hasSize( 2 );
-
+        }
+        catch ( Exception e )
+        {
+            logger.error( e.getMessage(), e );
+            throw e;
         }
         finally
         {
@@ -121,19 +119,9 @@ public class RepositoriesNamespaceTest
     protected void clearReposAndNamespace()
         throws Exception
     {
-        TypedQuery<Repository> queryR = em.createQuery( "SELECT r FROM Repository r", Repository.class );
-        for ( Repository r : queryR.getResultList() )
+        if ( true )
         {
-            em.remove( r );
+            return;
         }
-
-        TypedQuery<Namespace> query = em.createQuery( "SELECT n FROM Namespace n", Namespace.class );
-        for ( Namespace n : query.getResultList() )
-        {
-            em.remove( n );
-        }
-
-
-        em.clear();
     }
 }

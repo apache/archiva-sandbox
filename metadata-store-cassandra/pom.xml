@@ -89,15 +89,27 @@
     </dependency>
 
     <dependency>
-      <groupId>com.alvazan</groupId>
-      <artifactId>playorm</artifactId>
-      <version>1.5</version>
+      <groupId>com.netflix.astyanax</groupId>
+      <artifactId>astyanax-entity-mapper</artifactId>
+      <version>1.56.37</version>
       <exclusions>
         <exclusion>
           <groupId>stax</groupId>
           <artifactId>stax-api</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.netflix.astyanax</groupId>
+      <artifactId>astyanax-core</artifactId>
+      <version>1.56.37</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.netflix.astyanax</groupId>
+      <artifactId>astyanax-thrift</artifactId>
+      <version>1.56.37</version>
     </dependency>
 
     <dependency>

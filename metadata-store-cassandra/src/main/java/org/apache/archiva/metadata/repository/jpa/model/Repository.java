@@ -19,20 +19,10 @@ package org.apache.archiva.metadata.repository.jpa.model;
  * under the License.
  */
 
-import com.alvazan.orm.api.base.anno.NoSqlId;
-import com.alvazan.orm.api.base.anno.NoSqlIndexed;
-import com.alvazan.orm.api.base.anno.NoSqlOneToMany;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -52,17 +42,13 @@ public class Repository
     private static final long serialVersionUID = 1L;
 
     @Id
-    @NoSqlId
     @Column( name = "id" )
     private String id;
 
     @Column(name = "name")
-    @NoSqlIndexed
     private String name;
 
-    @OneToMany( fetch = FetchType.EAGER, mappedBy = "namespace")
-    @NoSqlOneToMany(columnName = "repository_id")
-    private List<Namespace> namespaces = new ArrayList<Namespace>();
+    private transient List<Namespace> namespaces = new ArrayList<Namespace>();
 
     public Repository()
     {
@@ -145,7 +131,7 @@ public class Repository
         final StringBuilder sb = new StringBuilder( "Repository{" );
         sb.append( "id='" ).append( id ).append( '\'' );
         sb.append( ", name='" ).append( name ).append( '\'' );
-        //sb.append( ", namespaces=" ).append( namespaces );
+        sb.append( ", namespaces=" ).append( namespaces );
         sb.append( '}' );
         return sb.toString();
     }

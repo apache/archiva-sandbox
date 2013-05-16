@@ -19,22 +19,13 @@ package org.apache.archiva.metadata.repository.jpa.model;
  * under the License.
  */
 
-import com.alvazan.orm.api.base.anno.NoSqlId;
-import com.alvazan.orm.api.base.anno.NoSqlIndexed;
-import com.alvazan.orm.api.base.anno.NoSqlManyToOne;
-
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 
@@ -43,7 +34,7 @@ import java.io.Serializable;
  * @author Olivier Lamy
  */
 @Entity
-@Table( name = "namespace", schema = "ArchivaKeySpace@archiva")
+//@Table( name = "namespace", schema = "ArchivaKeySpace@archiva")
 public class Namespace
     implements Serializable
 {
@@ -51,18 +42,18 @@ public class Namespace
     private static final long serialVersionUID = 1L;
 
     @Id
-    @NoSqlId
     @Column(name = "id")
     private String id;
 
     @Column(name = "name")
-    @NoSqlIndexed
     private String name;
 
-    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "repository_id")
-    @NoSqlManyToOne(columnName = "repository_id")
+    @Column(name = "repository")
     private Repository repository;
+
+    //@ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    //@JoinColumn(name = "repository_id")
+    //private transient Repository repository;
 
 
     public Namespace()
@@ -71,10 +62,11 @@ public class Namespace
     }
 
 
-    public Namespace( String id )
+    public Namespace( String id, Repository repository )
     {
-        this.id = id;
+        this.id = id + "-" + repository.getId();
         this.name = id;
+        this.repository = repository;
     }
 
     public String getId()
@@ -97,7 +89,6 @@ public class Namespace
         this.name = name;
     }
 
-
     public Repository getRepository()
     {
         return repository;
@@ -107,6 +98,17 @@ public class Namespace
     {
         this.repository = repository;
     }
+
+    /*
+    public String getRepositoryId()
+    {
+        return repositoryId;
+    }
+
+    public void setRepositoryId( String repositoryId )
+    {
+        this.repositoryId = repositoryId;
+    }*/
 
     @Override
     public boolean equals( Object o )
@@ -126,6 +128,10 @@ public class Namespace
         {
             return false;
         }
+        if ( !repository.getId().equals( namespace.repository.getId() ) )
+        {
+            return false;
+        }
 
         return true;
     }
@@ -133,7 +139,9 @@ public class Namespace
     @Override
     public int hashCode()
     {
-        return id.hashCode();
+        int result = id.hashCode();
+        result = 31 * result + repository.getId().hashCode();
+        return result;
     }
 
     @Override
@@ -142,7 +150,8 @@ public class Namespace
         final StringBuilder sb = new StringBuilder( "Namespace{" );
         sb.append( "id='" ).append( id ).append( '\'' );
         sb.append( ", name='" ).append( name ).append( '\'' );
-        sb.append( ", repository=" ).append( repository );
+        sb.append( ", repository='" ).append( repository ).append( '\'' );
+        //sb.append( ", repository=" ).append( repository );
         sb.append( '}' );
         return sb.toString();
     }

@@ -19,6 +19,9 @@ package org.apache.archiva.metadata.repository.jpa;
  * under the License.
  */
 
+import com.google.common.base.Function;
+import com.netflix.astyanax.Keyspace;
+import com.netflix.astyanax.entitystore.DefaultEntityManager;
 import org.apache.archiva.configuration.ArchivaConfiguration;
 import org.apache.archiva.metadata.model.ArtifactMetadata;
 import org.apache.archiva.metadata.model.MetadataFacet;
@@ -31,21 +34,21 @@ import org.apache.archiva.metadata.repository.MetadataRepositoryException;
 import org.apache.archiva.metadata.repository.MetadataResolutionException;
 import org.apache.archiva.metadata.repository.jpa.model.Namespace;
 import org.apache.archiva.metadata.repository.jpa.model.Repository;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Olivier Lamy
@@ -62,26 +65,83 @@ public class CassandraMetadataRepository
 
     private final Map<String, MetadataFacetFactory> metadataFacetFactories;
 
+    private Keyspace keyspace;
+
+    com.netflix.astyanax.entitystore.EntityManager<Repository, String> repositoryEntityManager;
+
+    com.netflix.astyanax.entitystore.EntityManager<Namespace, String> namespaceEntityManager;
+
     public CassandraMetadataRepository( Map<String, MetadataFacetFactory> metadataFacetFactories,
-                                        ArchivaConfiguration configuration, EntityManager entityManager )
+                                        ArchivaConfiguration configuration, EntityManager entityManager,
+                                        Keyspace keyspace )
     {
         this.metadataFacetFactories = metadataFacetFactories;
         this.configuration = configuration;
         this.entityManager = entityManager;
+        this.keyspace = keyspace;
+
+        repositoryEntityManager =
+            new DefaultEntityManager.Builder<Repository, String>().withEntityType( Repository.class ).withKeyspace(
+                keyspace ).build();
+
+        repositoryEntityManager.createStorage( null );
+
+        namespaceEntityManager =
+            new DefaultEntityManager.Builder<Namespace, String>().withEntityType( Namespace.class ).withKeyspace(
+                keyspace ).build();
+
+        namespaceEntityManager.createStorage( null );
+    }
+
+    public com.netflix.astyanax.entitystore.EntityManager<Repository, String> getRepositoryEntityManager()
+    {
+        return repositoryEntityManager;
+    }
+
+    public com.netflix.astyanax.entitystore.EntityManager<Namespace, String> getNamespaceEntityManager()
+    {
+        return namespaceEntityManager;
     }
 
     @Override
     public void updateNamespace( String repositoryId, String namespaceId )
         throws MetadataRepositoryException
     {
+        Repository repository = this.repositoryEntityManager.get( repositoryId );
+
+        if ( repository == null )
+        {
+            repository = new Repository( repositoryId );
+
+            Namespace namespace = new Namespace( namespaceId, repository );
+            //namespace.setRepository( repository );
+            //repository.getNamespaces().add( namespace );
+            this.repositoryEntityManager.put( repository );
+            this.namespaceEntityManager.put( namespace );
+        }
+        // FIXME add a Namespace id builder
+        Namespace namespace = namespaceEntityManager.get( namespaceId + "-" + repositoryId );
+        if ( namespace == null )
+        {
+            namespace = new Namespace( namespaceId, repository );
+            namespaceEntityManager.put( namespace );
+        }
+
+    }
+
+
+    public void updateNamespaceKundera( String repositoryId, String namespaceId )
+        throws MetadataRepositoryException
+    {
+
         Repository repository = this.entityManager.find( Repository.class, repositoryId );
 
         if ( repository == null )
         {
             repository = new Repository( repositoryId );
 
-            Namespace namespace = new Namespace( namespaceId );
-            namespace.setRepository( repository );
+            Namespace namespace = new Namespace( namespaceId, repository );
+            //namespace.setRepository( repository );
             //repository.getNamespaces().add( namespace );
             this.entityManager.persist( repository );
             this.entityManager.persist( namespace );
@@ -89,8 +149,8 @@ public class CassandraMetadataRepository
         else
         {
 
-            Namespace namespace = new Namespace( namespaceId );
-            namespace.setRepository( repository );
+            Namespace namespace = new Namespace( namespaceId, repository );
+            //namespace.setRepository( repository );
             entityManager.persist( namespace );
             // contains the namespace ?
             /*
@@ -105,7 +165,18 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public void removeNamespace( String repositoryId, String namespace )
+    public void removeNamespace( String repositoryId, String namespaceId )
+        throws MetadataRepositoryException
+    {
+        Namespace namespace = namespaceEntityManager.get( namespaceId + "-" + repositoryId );
+        if ( namespace != null )
+        {
+            namespaceEntityManager.remove( namespace );
+        }
+    }
+
+
+    public void removeNamespaceKundera( String repositoryId, String namespace )
         throws MetadataRepositoryException
     {
         TypedQuery<Namespace> typedQuery =
@@ -123,11 +194,36 @@ public class CassandraMetadataRepository
     public void removeRepository( String repositoryId )
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Repository repository = repositoryEntityManager.get( repositoryId );
+        if ( repository != null )
+        {
+            repositoryEntityManager.remove( repository );
+        }
     }
 
     @Override
     public Collection<String> getRepositories()
+        throws MetadataRepositoryException
+    {
+        logger.debug( "getRepositories" );
+
+        List<Repository> repositories = repositoryEntityManager.getAll();
+        if ( repositories == null )
+        {
+            return Collections.emptyList();
+        }
+        List<String> repoIds = new ArrayList<String>( repositories.size() );
+        for ( Repository repository : repositories )
+        {
+            repoIds.add( repository.getName() );
+        }
+        logger.debug( "getRepositories found: {}", repoIds );
+        return repoIds;
+
+    }
+
+
+    public Collection<String> getRepositoriesKundera()
         throws MetadataRepositoryException
     {
         logger.debug( "getRepositories" );
@@ -161,8 +257,69 @@ public class CassandraMetadataRepository
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public List<String> getNamespaces( final String repoId )
+        throws MetadataResolutionException
+    {
+        try
+        {
+            logger.debug( "getNamespaces for repository '{}'", repoId );
+            //TypedQuery<Repository> typedQuery =
+            //    entityManager.createQuery( "select n from Namespace n where n.repository_id=:id", Namespace.class );
 
-    public List<String> getNamespaces( String repoId )
+            //List<Repository> namespaces = typedQuery.setParameter( "id", repoId ).getResultList();
+
+            Repository repository = repositoryEntityManager.get( repoId );
+
+            if ( repository == null )
+            {
+                return Collections.emptyList();
+            }
+
+            // FIXME find correct cql query
+            //String query = "select * from namespace where repository.id = '" + repoId + "';";
+
+            //List<Namespace> namespaces = namespaceEntityManager.find( query );
+
+            final Set<Namespace> namespaces = new HashSet<Namespace>();
+
+            namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
+            {
+                // @Nullable add dependency ?
+                @Override
+                public Boolean apply( Namespace namespace )
+                {
+                    if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
+                                                                                                                 namespace.getRepository().getId() ) )
+                    {
+                        namespaces.add( namespace );
+                    }
+                    return Boolean.TRUE;
+                }
+            } );
+
+            repository.setNamespaces( new ArrayList<Namespace>( namespaces ) );
+
+            if ( repository == null || repository.getNamespaces().isEmpty() )
+            {
+                return Collections.emptyList();
+            }
+            List<String> namespaceIds = new ArrayList<String>( repository.getNamespaces().size() );
+
+            for ( Namespace n : repository.getNamespaces() )
+            {
+                namespaceIds.add( n.getName() );
+            }
+
+            logger.debug( "getNamespaces for repository '{}' found {}", repoId, namespaceIds.size() );
+            return namespaceIds;
+        }
+        catch ( PersistenceException e )
+        {
+            throw new MetadataResolutionException( e.getMessage(), e );
+        }
+    }
+
+    public List<String> getNamespacesKundera( String repoId )
         throws MetadataResolutionException
     {
         logger.debug( "getNamespaces for repository '{}'", repoId );
@@ -173,7 +330,7 @@ public class CassandraMetadataRepository
 
         Repository repository = entityManager.find( Repository.class, repoId );
 
-        if ( repository == null || repository.getNamespaces().isEmpty())
+        if ( repository == null || repository.getNamespaces().isEmpty() )
         {
             return Collections.emptyList();
         }

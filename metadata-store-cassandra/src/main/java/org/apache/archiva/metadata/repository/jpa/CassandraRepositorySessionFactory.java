@@ -19,6 +19,16 @@ package org.apache.archiva.metadata.repository.jpa;
  * under the License.
  */
 
+import com.google.common.collect.ImmutableMap;
+import com.netflix.astyanax.AstyanaxContext;
+import com.netflix.astyanax.Keyspace;
+import com.netflix.astyanax.connectionpool.NodeDiscoveryType;
+import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl;
+import com.netflix.astyanax.connectionpool.impl.ConnectionPoolType;
+import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor;
+import com.netflix.astyanax.impl.AstyanaxConfigurationImpl;
+import com.netflix.astyanax.thrift.ThriftFamilyFactory;
 import org.apache.archiva.configuration.ArchivaConfiguration;
 import org.apache.archiva.metadata.model.MetadataFacetFactory;
 import org.apache.archiva.metadata.repository.MetadataRepository;
@@ -33,10 +43,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author Olivier Lamy
@@ -63,6 +71,7 @@ public class CassandraRepositorySessionFactory
 
     private EntityManager entityManager;
 
+
     @PostConstruct
     public void initialize()
     {
@@ -78,15 +87,18 @@ public class CassandraRepositorySessionFactory
         {
             metadataFacetFactories.put( StringUtils.substringAfterLast( entry.getKey(), "#" ), entry.getValue() );
         }
+
+
     }
 
 
     @Override
     public RepositorySession createSession()
     {
-        MetadataRepository metadataRepository =
-            new CassandraMetadataRepository( metadataFacetFactories, configuration, entityManager );
-
+        CassandraMetadataRepository metadataRepository =
+            new CassandraMetadataRepository( metadataFacetFactories, configuration, entityManager,
+                                             archivaEntityManagerFactory.getKeyspace() );
         return new RepositorySession( metadataRepository, metadataResolver );
     }
+
 }
