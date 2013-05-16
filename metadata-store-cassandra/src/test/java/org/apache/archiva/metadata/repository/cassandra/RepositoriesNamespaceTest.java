@@ -46,7 +46,7 @@ public class RepositoriesNamespaceTest
 
     @Inject
     @Named( value = "archivaEntityManagerFactory#cassandra" )
-    ArchivaEntityManagerFactory archivaEntityManagerFactory;
+    ArchivaCassandraEntityManagerFactory archivaCassandraEntityManagerFactory;
 
 
     CassandraMetadataRepository cmr;
@@ -56,7 +56,7 @@ public class RepositoriesNamespaceTest
         throws Exception
     {
 
-        cmr = new CassandraMetadataRepository( null, null, archivaEntityManagerFactory.getKeyspace() );
+        cmr = new CassandraMetadataRepository( null, null, archivaCassandraEntityManagerFactory.getKeyspace() );
 
     }
 

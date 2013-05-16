@@ -24,7 +24,7 @@ import com.netflix.astyanax.Keyspace;
 /**
  * @author Olivier Lamy
  */
-public interface ArchivaEntityManagerFactory
+public interface ArchivaCassandraEntityManagerFactory
 {
     Keyspace getKeyspace();
 
