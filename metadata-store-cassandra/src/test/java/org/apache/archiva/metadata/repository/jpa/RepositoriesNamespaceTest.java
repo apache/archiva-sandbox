@@ -44,10 +44,6 @@ public class RepositoriesNamespaceTest
 
     private Logger logger = LoggerFactory.getLogger( getClass() );
 
-    //@Inject
-    //private ThriftEntityManager em;
-    //EntityManagerImpl em;
-
     @Inject
     @Named( value = "archivaEntityManagerFactory#jpa-archiva" )
     ArchivaEntityManagerFactory archivaEntityManagerFactory;
@@ -60,7 +56,7 @@ public class RepositoriesNamespaceTest
         throws Exception
     {
 
-        cmr = new CassandraMetadataRepository( null, null, null, archivaEntityManagerFactory.getKeyspace() );
+        cmr = new CassandraMetadataRepository( null, null, archivaEntityManagerFactory.getKeyspace() );
 
     }
 

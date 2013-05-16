@@ -49,7 +49,7 @@ import java.util.Map;
 /**
  * @author Olivier Lamy
  */
-@Service("repositorySessionFactory#cassandra")
+@Service( "repositorySessionFactory#cassandra" )
 public class CassandraRepositorySessionFactory
     implements RepositorySessionFactory
 {
@@ -57,7 +57,7 @@ public class CassandraRepositorySessionFactory
     private Map<String, MetadataFacetFactory> metadataFacetFactories;
 
     @Inject
-    @Named(value = "archivaConfiguration#default")
+    @Named( value = "archivaConfiguration#default" )
     private ArchivaConfiguration configuration;
 
     @Inject
@@ -69,14 +69,9 @@ public class CassandraRepositorySessionFactory
     @Inject
     private ArchivaEntityManagerFactory archivaEntityManagerFactory;
 
-    private EntityManager entityManager;
-
-
     @PostConstruct
     public void initialize()
     {
-        entityManager = archivaEntityManagerFactory.getEntityManager();
-
         Map<String, MetadataFacetFactory> tmpMetadataFacetFactories =
             applicationContext.getBeansOfType( MetadataFacetFactory.class );
         // olamy with spring the "id" is now "metadataFacetFactory#hint"
@@ -96,7 +91,7 @@ public class CassandraRepositorySessionFactory
     public RepositorySession createSession()
     {
         CassandraMetadataRepository metadataRepository =
-            new CassandraMetadataRepository( metadataFacetFactories, configuration, entityManager,
+            new CassandraMetadataRepository( metadataFacetFactories, configuration,
                                              archivaEntityManagerFactory.getKeyspace() );
         return new RepositorySession( metadataRepository, metadataResolver );
     }

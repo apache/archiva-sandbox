@@ -34,22 +34,17 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import java.util.Properties;
 
 /**
  * @author Olivier Lamy
  */
-@Service( "archivaEntityManagerFactory#jpa-archiva" )
+@Service("archivaEntityManagerFactory#jpa-archiva")
 public class DefaultArchivaEntityManagerFactory
     implements ArchivaEntityManagerFactory
 {
 
     @Inject
     private ApplicationContext applicationContext;
-
-    private EntityManager entityManager;
 
     private static final String CLUSTER_NAME = "archiva";
 
@@ -90,11 +85,6 @@ public class DefaultArchivaEntityManagerFactory
 
     }
 
-    @Override
-    public EntityManager getEntityManager()
-    {
-        return entityManager;
-    }
 
     @Override
     public Keyspace getKeyspace()
