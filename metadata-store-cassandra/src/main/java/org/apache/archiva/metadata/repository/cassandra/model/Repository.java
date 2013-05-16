@@ -1,4 +1,4 @@
-package org.apache.archiva.metadata.repository.jpa.model;
+package org.apache.archiva.metadata.repository.cassandra.model;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,9 +21,7 @@ package org.apache.archiva.metadata.repository.jpa.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.ArrayList;

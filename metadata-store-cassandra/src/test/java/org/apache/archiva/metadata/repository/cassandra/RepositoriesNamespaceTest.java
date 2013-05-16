@@ -1,4 +1,4 @@
-package org.apache.archiva.metadata.repository.jpa;
+package org.apache.archiva.metadata.repository.cassandra;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,8 +19,8 @@ package org.apache.archiva.metadata.repository.jpa;
  * under the License.
  */
 
-import org.apache.archiva.metadata.repository.jpa.model.Namespace;
-import org.apache.archiva.metadata.repository.jpa.model.Repository;
+import org.apache.archiva.metadata.repository.cassandra.model.Namespace;
+import org.apache.archiva.metadata.repository.cassandra.model.Repository;
 import org.apache.archiva.test.utils.ArchivaSpringJUnit4ClassRunner;
 import org.fest.assertions.api.Assertions;
 import org.junit.After;
@@ -45,7 +45,7 @@ public class RepositoriesNamespaceTest
     private Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Inject
-    @Named( value = "archivaEntityManagerFactory#jpa-archiva" )
+    @Named( value = "archivaEntityManagerFactory#cassandra" )
     ArchivaEntityManagerFactory archivaEntityManagerFactory;
 
 

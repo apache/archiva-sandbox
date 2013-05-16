@@ -1,4 +1,4 @@
-package org.apache.archiva.metadata.repository.jpa;
+package org.apache.archiva.metadata.repository.cassandra;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one

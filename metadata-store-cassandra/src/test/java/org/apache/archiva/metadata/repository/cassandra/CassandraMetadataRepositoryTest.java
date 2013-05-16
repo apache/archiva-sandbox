@@ -1,4 +1,4 @@
-package org.apache.archiva.metadata.repository.jpa;
+package org.apache.archiva.metadata.repository.cassandra;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,18 +19,15 @@ package org.apache.archiva.metadata.repository.jpa;
  * under the License.
  */
 
-import org.apache.archiva.metadata.model.MetadataFacetFactory;
 import org.apache.archiva.metadata.repository.AbstractMetadataRepositoryTest;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
-import java.util.Map;
 
 /**
  * @author Olivier Lamy
@@ -41,7 +38,7 @@ public class CassandraMetadataRepositoryTest
     private Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Inject
-    @Named( value = "archivaEntityManagerFactory#jpa-archiva" )
+    @Named( value = "archivaEntityManagerFactory#cassandra" )
     ArchivaEntityManagerFactory archivaEntityManagerFactory;
 
     @Before

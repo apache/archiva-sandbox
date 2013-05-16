@@ -1,4 +1,4 @@
-package org.apache.archiva.metadata.repository.jpa;
+package org.apache.archiva.metadata.repository.cassandra;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -39,7 +39,7 @@ import javax.inject.Inject;
  * FIXME make all configuration not hardcoded :-)
  * @author Olivier Lamy
  */
-@Service("archivaEntityManagerFactory#jpa-archiva")
+@Service("archivaEntityManagerFactory#cassandra")
 public class DefaultArchivaEntityManagerFactory
     implements ArchivaEntityManagerFactory
 {
