@@ -19,9 +19,18 @@ package org.apache.archiva.metadata.repository.jpa;
  * under the License.
  */
 
+import org.apache.archiva.metadata.model.MetadataFacetFactory;
 import org.apache.archiva.metadata.repository.AbstractMetadataRepositoryTest;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.File;
+import java.util.Map;
 
 /**
  * @author Olivier Lamy
@@ -29,5 +38,24 @@ import org.junit.Test;
 public class CassandraMetadataRepositoryTest
     extends AbstractMetadataRepositoryTest
 {
+    private Logger logger = LoggerFactory.getLogger( getClass() );
 
+    @Inject
+    @Named( value = "archivaEntityManagerFactory#jpa-archiva" )
+    ArchivaEntityManagerFactory archivaEntityManagerFactory;
+
+    @Before
+    public void setUp()
+        throws Exception
+    {
+        super.setUp();
+
+        File directory = new File( "target/test-repositories" );
+        if ( directory.exists() )
+        {
+            FileUtils.deleteDirectory( directory );
+        }
+
+        this.repository = new CassandraMetadataRepository( null, null, archivaEntityManagerFactory.getKeyspace() );
+    }
 }

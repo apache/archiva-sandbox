@@ -21,6 +21,7 @@ package org.apache.archiva.metadata.repository.jpa;
 
 import com.google.common.base.Function;
 import com.netflix.astyanax.Keyspace;
+import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.entitystore.DefaultEntityManager;
 import com.netflix.astyanax.entitystore.EntityManager;
 import org.apache.archiva.configuration.ArchivaConfiguration;
@@ -47,6 +48,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -76,17 +78,35 @@ public class CassandraMetadataRepository
 
         this.keyspace = keyspace;
 
-        repositoryEntityManager =
-            new DefaultEntityManager.Builder<Repository, String>().withEntityType( Repository.class ).withKeyspace(
-                keyspace ).build();
+        try
+        {
+            Properties properties = keyspace.getKeyspaceProperties();
+            logger.info( "keyspace properties: {}", properties );
+        }
+        catch ( ConnectionException e )
+        {
+            // FIXME better logging !
+            logger.warn( e.getMessage(), e );
+        }
 
-        repositoryEntityManager.createStorage( null );
+        try
+        {
+            repositoryEntityManager =
+                new DefaultEntityManager.Builder<Repository, String>().withEntityType( Repository.class ).withKeyspace(
+                    keyspace ).build();
 
-        namespaceEntityManager =
-            new DefaultEntityManager.Builder<Namespace, String>().withEntityType( Namespace.class ).withKeyspace(
-                keyspace ).build();
+            repositoryEntityManager.createStorage( null );
 
-        namespaceEntityManager.createStorage( null );
+            namespaceEntityManager =
+                new DefaultEntityManager.Builder<Namespace, String>().withEntityType( Namespace.class ).withKeyspace(
+                    keyspace ).build();
+
+            namespaceEntityManager.createStorage( null );
+        }
+        catch ( PersistenceException e )
+        {
+            logger.error( e.getMessage(), e );
+        }
     }
 
     public EntityManager<Repository, String> getRepositoryEntityManager()
@@ -174,17 +194,62 @@ public class CassandraMetadataRepository
 
 
     @Override
-    public Collection<String> getRootNamespaces( String repoId )
+    public Collection<String> getRootNamespaces( final String repoId )
         throws MetadataResolutionException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        final Set<Namespace> namespaces = new HashSet<Namespace>();
+
+        namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
+        {
+            // @Nullable add dependency ?
+            @Override
+            public Boolean apply( Namespace namespace )
+            {
+                if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
+                                                                                                             namespace.getRepository().getId() ) )
+                {
+                    if ( !StringUtils.contains( namespace.getName(), "." ) )
+                    {
+                        namespaces.add( namespace );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
+
+        return namespaceNames;
     }
 
     @Override
-    public Collection<String> getNamespaces( String repoId, String namespace )
+    public Collection<String> getNamespaces( final String repoId, final String namespaceId )
         throws MetadataResolutionException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        final Set<Namespace> namespaces = new HashSet<Namespace>();
+
+        namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
+        {
+            // @Nullable add dependency ?
+            @Override
+            public Boolean apply( Namespace namespace )
+            {
+                if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
+                                                                                                             namespace.getRepository().getId() ) )
+                {
+                    if ( StringUtils.startsWith( namespace.getName(), namespaceId ) )
+                    {
+                        namespaces.add( namespace );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
+
+        return namespaceNames;
+
     }
 
     public List<String> getNamespaces( final String repoId )
