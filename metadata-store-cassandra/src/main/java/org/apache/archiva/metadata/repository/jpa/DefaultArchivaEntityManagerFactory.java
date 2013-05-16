@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 /**
+ * FIXME make all configuration not hardcoded :-)
  * @author Olivier Lamy
  */
 @Service("archivaEntityManagerFactory#jpa-archiva")
@@ -59,8 +60,6 @@ public class DefaultArchivaEntityManagerFactory
     public void initialize()
         throws ConnectionException
     {
-
-        //entityManager = Persistence.createEntityManagerFactory( "archiva", new Properties() ).createEntityManager();
 
         keyspaceContext = new AstyanaxContext.Builder().forCluster( CLUSTER_NAME ).forKeyspace(
             KEYSPACE_NAME ).withAstyanaxConfiguration(
