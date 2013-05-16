@@ -64,7 +64,7 @@ public class Namespace
 
     public Namespace( String id, Repository repository )
     {
-        this.id = id + "-" + repository.getId();
+        this.id = new KeyBuilder().withNamespace( id ).withRepositoryId( repository.getId() ).build();
         this.name = id;
         this.repository = repository;
     }
@@ -151,8 +151,45 @@ public class Namespace
         sb.append( "id='" ).append( id ).append( '\'' );
         sb.append( ", name='" ).append( name ).append( '\'' );
         sb.append( ", repository='" ).append( repository ).append( '\'' );
-        //sb.append( ", repository=" ).append( repository );
         sb.append( '}' );
         return sb.toString();
+    }
+
+    public static class KeyBuilder
+    {
+
+        private String namespace;
+
+        private String repositoryId;
+
+        public KeyBuilder()
+        {
+
+        }
+
+        public KeyBuilder withNamespace( Namespace namespace )
+        {
+            this.namespace = namespace.getId();
+            this.repositoryId = namespace.getRepository().getId();
+            return this;
+        }
+
+        public KeyBuilder withNamespace( String namespace )
+        {
+            this.namespace = namespace;
+            return this;
+        }
+
+        public KeyBuilder withRepositoryId( String repositoryId )
+        {
+            this.repositoryId = repositoryId;
+            return this;
+        }
+
+        public String build()
+        {
+            // FIXME add some controls
+            return this.namespace + "-" + this.repositoryId;
+        }
     }
 }

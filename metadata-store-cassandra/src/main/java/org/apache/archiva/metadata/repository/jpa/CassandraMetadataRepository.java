@@ -116,7 +116,8 @@ public class CassandraMetadataRepository
             this.namespaceEntityManager.put( namespace );
         }
         // FIXME add a Namespace id builder
-        Namespace namespace = namespaceEntityManager.get( namespaceId + "-" + repositoryId );
+        Namespace namespace = namespaceEntityManager.get(
+            new Namespace.KeyBuilder().withNamespace( namespaceId ).withRepositoryId( repositoryId ).build() );
         if ( namespace == null )
         {
             namespace = new Namespace( namespaceId, repository );
@@ -130,7 +131,8 @@ public class CassandraMetadataRepository
     public void removeNamespace( String repositoryId, String namespaceId )
         throws MetadataRepositoryException
     {
-        Namespace namespace = namespaceEntityManager.get( namespaceId + "-" + repositoryId );
+        Namespace namespace = namespaceEntityManager.get(
+            new Namespace.KeyBuilder().withNamespace( namespaceId ).withRepositoryId( repositoryId ).build() );
         if ( namespace != null )
         {
             namespaceEntityManager.remove( namespace );
