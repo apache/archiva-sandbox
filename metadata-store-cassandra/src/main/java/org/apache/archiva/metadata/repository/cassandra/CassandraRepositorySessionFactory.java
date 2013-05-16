@@ -55,7 +55,7 @@ public class CassandraRepositorySessionFactory
     private ApplicationContext applicationContext;
 
     @Inject
-    private ArchivaCassandraEntityManagerFactory archivaCassandraEntityManagerFactory;
+    private CassandraEntityManagerFactory cassandraEntityManagerFactory;
 
     @PostConstruct
     public void initialize()
@@ -80,7 +80,7 @@ public class CassandraRepositorySessionFactory
     {
         CassandraMetadataRepository metadataRepository =
             new CassandraMetadataRepository( metadataFacetFactories, configuration,
-                                             archivaCassandraEntityManagerFactory.getKeyspace() );
+                                             cassandraEntityManagerFactory.getKeyspace() );
         return new RepositorySession( metadataRepository, metadataResolver );
     }
 

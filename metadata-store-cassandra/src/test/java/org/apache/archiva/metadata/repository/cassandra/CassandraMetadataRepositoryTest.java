@@ -39,7 +39,7 @@ public class CassandraMetadataRepositoryTest
 
     @Inject
     @Named( value = "archivaEntityManagerFactory#cassandra" )
-    ArchivaCassandraEntityManagerFactory archivaCassandraEntityManagerFactory;
+    CassandraEntityManagerFactory cassandraEntityManagerFactory;
 
     @Before
     public void setUp()
@@ -53,6 +53,6 @@ public class CassandraMetadataRepositoryTest
             FileUtils.deleteDirectory( directory );
         }
 
-        this.repository = new CassandraMetadataRepository( null, null, archivaCassandraEntityManagerFactory.getKeyspace() );
+        this.repository = new CassandraMetadataRepository( null, null, cassandraEntityManagerFactory.getKeyspace() );
     }
 }

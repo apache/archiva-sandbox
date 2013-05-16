@@ -40,8 +40,8 @@ import javax.inject.Inject;
  * @author Olivier Lamy
  */
 @Service("archivaEntityManagerFactory#cassandra")
-public class DefaultArchivaCassandraEntityManagerFactory
-    implements ArchivaCassandraEntityManagerFactory
+public class DefaultCassandraEntityManagerFactory
+    implements CassandraEntityManagerFactory
 {
 
     @Inject
