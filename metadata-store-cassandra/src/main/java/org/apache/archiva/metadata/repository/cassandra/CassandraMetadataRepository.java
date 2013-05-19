@@ -129,7 +129,7 @@ public class CassandraMetadataRepository
     {
         try
         {
-            Properties properties = keyspace.getColumnFamilyProperties( "repository" );
+            Properties properties = keyspace.getColumnFamilyProperties( columnFamilyName );
             return true;
         }
         catch ( NotFoundException e )
@@ -162,26 +162,33 @@ public class CassandraMetadataRepository
     public void updateNamespace( String repositoryId, String namespaceId )
         throws MetadataRepositoryException
     {
-        Repository repository = this.repositoryEntityManager.get( repositoryId );
-
-        if ( repository == null )
+        try
         {
-            repository = new Repository( repositoryId );
+            Repository repository = this.repositoryEntityManager.get( repositoryId );
 
-            Namespace namespace = new Namespace( namespaceId, repository );
-            //namespace.setRepository( repository );
-            //repository.getNamespaces().add( namespace );
-            this.repositoryEntityManager.put( repository );
+            if ( repository == null )
+            {
+                repository = new Repository( repositoryId );
 
-            this.namespaceEntityManager.put( namespace );
+                Namespace namespace = new Namespace( namespaceId, repository );
+                //namespace.setRepository( repository );
+                //repository.getNamespaces().add( namespace );
+                this.repositoryEntityManager.put( repository );
+
+                this.namespaceEntityManager.put( namespace );
+            }
+            // FIXME add a Namespace id builder
+            Namespace namespace = namespaceEntityManager.get(
+                new Namespace.KeyBuilder().withNamespace( namespaceId ).withRepositoryId( repositoryId ).build() );
+            if ( namespace == null )
+            {
+                namespace = new Namespace( namespaceId, repository );
+                namespaceEntityManager.put( namespace );
+            }
         }
-        // FIXME add a Namespace id builder
-        Namespace namespace = namespaceEntityManager.get(
-            new Namespace.KeyBuilder().withNamespace( namespaceId ).withRepositoryId( repositoryId ).build() );
-        if ( namespace == null )
+        catch ( PersistenceException e )
         {
-            namespace = new Namespace( namespaceId, repository );
-            namespaceEntityManager.put( namespace );
+            throw new MetadataRepositoryException( e.getMessage(), e );
         }
 
     }
@@ -191,11 +198,18 @@ public class CassandraMetadataRepository
     public void removeNamespace( String repositoryId, String namespaceId )
         throws MetadataRepositoryException
     {
-        Namespace namespace = namespaceEntityManager.get(
-            new Namespace.KeyBuilder().withNamespace( namespaceId ).withRepositoryId( repositoryId ).build() );
-        if ( namespace != null )
+        try
         {
-            namespaceEntityManager.remove( namespace );
+            Namespace namespace = namespaceEntityManager.get(
+                new Namespace.KeyBuilder().withNamespace( namespaceId ).withRepositoryId( repositoryId ).build() );
+            if ( namespace != null )
+            {
+                namespaceEntityManager.remove( namespace );
+            }
+        }
+        catch ( PersistenceException e )
+        {
+            throw new MetadataRepositoryException( e.getMessage(), e );
         }
     }
 
@@ -204,10 +218,17 @@ public class CassandraMetadataRepository
     public void removeRepository( String repositoryId )
         throws MetadataRepositoryException
     {
-        Repository repository = repositoryEntityManager.get( repositoryId );
-        if ( repository != null )
+        try
         {
-            repositoryEntityManager.remove( repository );
+            Repository repository = repositoryEntityManager.get( repositoryId );
+            if ( repository != null )
+            {
+                repositoryEntityManager.remove( repository );
+            }
+        }
+        catch ( PersistenceException e )
+        {
+            throw new MetadataRepositoryException( e.getMessage(), e );
         }
     }
 
@@ -215,20 +236,27 @@ public class CassandraMetadataRepository
     public Collection<String> getRepositories()
         throws MetadataRepositoryException
     {
-        logger.debug( "getRepositories" );
+        try
+        {
+            logger.debug( "getRepositories" );
 
-        List<Repository> repositories = repositoryEntityManager.getAll();
-        if ( repositories == null )
-        {
-            return Collections.emptyList();
+            List<Repository> repositories = repositoryEntityManager.getAll();
+            if ( repositories == null )
+            {
+                return Collections.emptyList();
+            }
+            List<String> repoIds = new ArrayList<String>( repositories.size() );
+            for ( Repository repository : repositories )
+            {
+                repoIds.add( repository.getName() );
+            }
+            logger.debug( "getRepositories found: {}", repoIds );
+            return repoIds;
         }
-        List<String> repoIds = new ArrayList<String>( repositories.size() );
-        for ( Repository repository : repositories )
+        catch ( PersistenceException e )
         {
-            repoIds.add( repository.getName() );
+            throw new MetadataRepositoryException( e.getMessage(), e );
         }
-        logger.debug( "getRepositories found: {}", repoIds );
-        return repoIds;
 
     }
 
@@ -237,68 +265,82 @@ public class CassandraMetadataRepository
     public Collection<String> getRootNamespaces( final String repoId )
         throws MetadataResolutionException
     {
-        final Set<Namespace> namespaces = new HashSet<Namespace>();
-
-        namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
+        try
         {
-            // @Nullable add dependency ?
-            @Override
-            public Boolean apply( Namespace namespace )
+            final Set<Namespace> namespaces = new HashSet<Namespace>();
+
+            namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
             {
-                if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
-                                                                                                             namespace.getRepository().getId() ) )
+                // @Nullable add dependency ?
+                @Override
+                public Boolean apply( Namespace namespace )
                 {
-                    if ( !StringUtils.contains( namespace.getName(), "." ) )
+                    if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
+                                                                                                                 namespace.getRepository().getId() ) )
                     {
-                        namespaces.add( namespace );
+                        if ( !StringUtils.contains( namespace.getName(), "." ) )
+                        {
+                            namespaces.add( namespace );
+                        }
                     }
+                    return Boolean.TRUE;
                 }
-                return Boolean.TRUE;
+            } );
+
+            List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
+
+            for ( Namespace namespace : namespaces )
+            {
+                namespaceNames.add( namespace.getName() );
             }
-        } );
 
-        List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
-
-        for ( Namespace namespace : namespaces )
-        {
-            namespaceNames.add( namespace.getName() );
+            return namespaceNames;
         }
-
-        return namespaceNames;
+        catch ( PersistenceException e )
+        {
+            throw new MetadataResolutionException( e.getMessage(), e );
+        }
     }
 
     @Override
     public Collection<String> getNamespaces( final String repoId, final String namespaceId )
         throws MetadataResolutionException
     {
-        final Set<Namespace> namespaces = new HashSet<Namespace>();
-
-        namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
+        try
         {
-            // @Nullable add dependency ?
-            @Override
-            public Boolean apply( Namespace namespace )
+            final Set<Namespace> namespaces = new HashSet<Namespace>();
+
+            namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
             {
-                if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
-                                                                                                             namespace.getRepository().getId() ) )
+                // @Nullable add dependency ?
+                @Override
+                public Boolean apply( Namespace namespace )
                 {
-                    if ( StringUtils.startsWith( namespace.getName(), namespaceId ) )
+                    if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
+                                                                                                                 namespace.getRepository().getId() ) )
                     {
-                        namespaces.add( namespace );
+                        if ( StringUtils.startsWith( namespace.getName(), namespaceId ) )
+                        {
+                            namespaces.add( namespace );
+                        }
                     }
+                    return Boolean.TRUE;
                 }
-                return Boolean.TRUE;
+            } );
+
+            List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
+
+            for ( Namespace namespace : namespaces )
+            {
+                namespaceNames.add( namespace.getName() );
             }
-        } );
 
-        List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
-
-        for ( Namespace namespace : namespaces )
-        {
-            namespaceNames.add( namespace.getName() );
+            return namespaceNames;
         }
-
-        return namespaceNames;
+        catch ( PersistenceException e )
+        {
+            throw new MetadataResolutionException( e.getMessage(), e );
+        }
 
     }
 
