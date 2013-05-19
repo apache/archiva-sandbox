@@ -587,26 +587,27 @@ public class CassandraMetadataRepository
     @Override
     public void save()
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        logger.trace( "save" );
     }
 
     @Override
     public void close()
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        logger.trace( "close" );
     }
 
     @Override
     public void revert()
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        logger.trace( "revert" );
     }
 
     @Override
     public boolean canObtainAccess( Class<?> aClass )
     {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        // TODO
+        return false;
     }
 
     @Override
