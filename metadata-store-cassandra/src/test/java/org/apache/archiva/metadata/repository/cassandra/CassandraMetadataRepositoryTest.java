@@ -21,6 +21,7 @@ package org.apache.archiva.metadata.repository.cassandra;
 
 import org.apache.archiva.metadata.repository.AbstractMetadataRepositoryTest;
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,4 +56,13 @@ public class CassandraMetadataRepositoryTest
 
         this.repository = new CassandraMetadataRepository( null, null, cassandraEntityManagerFactory.getKeyspace() );
     }
+
+
+    @After
+    public void shutdown()
+        throws Exception
+    {
+        //cassandraEntityManagerFactory.getKeyspace().dr .dropKeyspace();
+    }
+
 }

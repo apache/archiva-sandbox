@@ -119,6 +119,16 @@ public class CassandraMetadataRepository
         return namespaceEntityManager;
     }
 
+    public void setRepositoryEntityManager( EntityManager<Repository, String> repositoryEntityManager )
+    {
+        this.repositoryEntityManager = repositoryEntityManager;
+    }
+
+    public void setNamespaceEntityManager( EntityManager<Namespace, String> namespaceEntityManager )
+    {
+        this.namespaceEntityManager = namespaceEntityManager;
+    }
+
     @Override
     public void updateNamespace( String repositoryId, String namespaceId )
         throws MetadataRepositoryException
@@ -133,6 +143,7 @@ public class CassandraMetadataRepository
             //namespace.setRepository( repository );
             //repository.getNamespaces().add( namespace );
             this.repositoryEntityManager.put( repository );
+
             this.namespaceEntityManager.put( namespace );
         }
         // FIXME add a Namespace id builder
@@ -219,6 +230,11 @@ public class CassandraMetadataRepository
 
         List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
 
+        for ( Namespace namespace : namespaces )
+        {
+            namespaceNames.add( namespace.getName() );
+        }
+
         return namespaceNames;
     }
 
@@ -247,6 +263,11 @@ public class CassandraMetadataRepository
         } );
 
         List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
+
+        for ( Namespace namespace : namespaces )
+        {
+            namespaceNames.add( namespace.getName() );
+        }
 
         return namespaceNames;
 

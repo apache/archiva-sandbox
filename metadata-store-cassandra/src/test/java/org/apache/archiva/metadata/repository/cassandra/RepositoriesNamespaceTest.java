@@ -64,8 +64,7 @@ public class RepositoriesNamespaceTest
     public void shutdown()
         throws Exception
     {
-        //em.close();
-        //emf.close();
+
     }
 
 
