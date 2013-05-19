@@ -130,6 +130,7 @@ public class CassandraMetadataRepository
         try
         {
             Properties properties = keyspace.getColumnFamilyProperties( columnFamilyName );
+            logger.debug( "getColumnFamilyProperties for {}: {}", columnFamilyName, properties );
             return true;
         }
         catch ( NotFoundException e )
