@@ -22,6 +22,7 @@ package org.apache.archiva.metadata.repository.cassandra;
 import com.google.common.base.Function;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import com.netflix.astyanax.connectionpool.exceptions.NotFoundException;
 import com.netflix.astyanax.entitystore.DefaultEntityManager;
 import com.netflix.astyanax.entitystore.EntityManager;
 import org.apache.archiva.configuration.ArchivaConfiguration;
@@ -94,18 +95,46 @@ public class CassandraMetadataRepository
             repositoryEntityManager =
                 new DefaultEntityManager.Builder<Repository, String>().withEntityType( Repository.class ).withKeyspace(
                     keyspace ).build();
-
-            repositoryEntityManager.createStorage( null );
+            boolean exists = columnFamilyExists( "repository" );
+            // TODO very basic test we must test model change too
+            if ( !exists )
+            {
+                repositoryEntityManager.createStorage( null );
+            }
 
             namespaceEntityManager =
                 new DefaultEntityManager.Builder<Namespace, String>().withEntityType( Namespace.class ).withKeyspace(
                     keyspace ).build();
 
-            namespaceEntityManager.createStorage( null );
+            exists = columnFamilyExists( "namespace" );
+            if ( !exists )
+            {
+                namespaceEntityManager.createStorage( null );
+            }
         }
         catch ( PersistenceException e )
         {
+            // FIXME report exception
             logger.error( e.getMessage(), e );
+        }
+        catch ( ConnectionException e )
+        {
+            // FIXME report exception
+            logger.error( e.getMessage(), e );
+        }
+    }
+
+    private boolean columnFamilyExists( String columnFamilyName )
+        throws ConnectionException
+    {
+        try
+        {
+            Properties properties = keyspace.getColumnFamilyProperties( "repository" );
+            return true;
+        }
+        catch ( NotFoundException e )
+        {
+            return false;
         }
     }
 
