@@ -606,14 +606,14 @@ public class CassandraMetadataRepository
     @Override
     public boolean canObtainAccess( Class<?> aClass )
     {
-        // TODO
         return false;
     }
 
     @Override
-    public Object obtainAccess( Class<?> aClass )
+    public <T>T obtainAccess( Class<T> aClass )
         throws MetadataRepositoryException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new IllegalArgumentException(
+            "Access using " + aClass + " is not supported on the cassandra metadata storage" );
     }
 }
