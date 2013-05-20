@@ -184,7 +184,7 @@ public class Namespace
         public String build()
         {
             // FIXME add some controls
-            return this.namespace + "-" + this.repositoryId;
+            return this.repositoryId + "-" + this.namespace;
         }
     }
 }

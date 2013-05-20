@@ -36,6 +36,7 @@ import org.apache.archiva.metadata.repository.MetadataRepository;
 import org.apache.archiva.metadata.repository.MetadataRepositoryException;
 import org.apache.archiva.metadata.repository.MetadataResolutionException;
 import org.apache.archiva.metadata.repository.cassandra.model.Namespace;
+import org.apache.archiva.metadata.repository.cassandra.model.Project;
 import org.apache.archiva.metadata.repository.cassandra.model.Repository;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -70,6 +71,8 @@ public class CassandraMetadataRepository
     private EntityManager<Repository, String> repositoryEntityManager;
 
     private EntityManager<Namespace, String> namespaceEntityManager;
+
+    private EntityManager<Project, String> projectEntityManager;
 
     public CassandraMetadataRepository( Map<String, MetadataFacetFactory> metadataFacetFactories,
                                         ArchivaConfiguration configuration, Keyspace keyspace )
@@ -110,6 +113,16 @@ public class CassandraMetadataRepository
             if ( !exists )
             {
                 namespaceEntityManager.createStorage( null );
+            }
+
+            projectEntityManager =
+                new DefaultEntityManager.Builder<Project, String>().withEntityType( Project.class ).withKeyspace(
+                    keyspace ).build();
+
+            exists = columnFamilyExists( "project" );
+            if ( !exists )
+            {
+                projectEntityManager.createStorage( null );
             }
         }
         catch ( PersistenceException e )
@@ -409,10 +422,34 @@ public class CassandraMetadataRepository
 
 
     @Override
-    public void updateProject( String repositoryId, ProjectMetadata project )
+    public void updateProject( String repositoryId, ProjectMetadata projectMetadata )
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+
+        // project exists ? if yes return
+        String projectKey = new Project.KeyBuilder().withProjectId( projectMetadata.getId() ).withNamespace(
+            new Namespace( projectMetadata.getNamespace(), new Repository( repositoryId ) ) ).build();
+
+        Project project = projectEntityManager.get( projectKey );
+        if ( project != null )
+        {
+            return;
+        }
+
+        // FIXME really needed ?
+        // test if the namespace exist
+        String namespaceKey = new Namespace.KeyBuilder().withRepositoryId( repositoryId ).withNamespace(
+            projectMetadata.getNamespace() ).build();
+        Namespace namespace = namespaceEntityManager.get( namespaceKey );
+        if ( namespace == null )
+        {
+            updateNamespace( repositoryId, projectMetadata.getNamespace() );
+        }
+
+        project = new Project( projectKey, namespace );
+
+        projectEntityManager.put( project );
+
     }
 
     @Override
@@ -610,7 +647,7 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public <T>T obtainAccess( Class<T> aClass )
+    public <T> T obtainAccess( Class<T> aClass )
         throws MetadataRepositoryException
     {
         throw new IllegalArgumentException(
