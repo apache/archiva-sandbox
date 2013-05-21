@@ -1,0 +1,251 @@
+package org.apache.archiva.metadata.repository.cassandra.model;
+
+import org.apache.archiva.metadata.model.CiManagement;
+import org.apache.archiva.metadata.model.Dependency;
+import org.apache.archiva.metadata.model.IssueManagement;
+import org.apache.archiva.metadata.model.License;
+import org.apache.archiva.metadata.model.MailingList;
+import org.apache.archiva.metadata.model.Organization;
+import org.apache.archiva.metadata.model.Scm;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Olivier Lamy
+ */
+@Entity
+public class ProjectVersionMetadataModel
+{
+    // repositoryId + namespace + projectId + id (version)
+    @Id
+    private String rowId;
+
+    /**
+     * id is the version
+     */
+    @Column(name = "id")
+    private String id;
+
+    @Column(name = "url")
+    private String url;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "organization")
+    private Organization organization;
+
+    @Column(name = "issueManagement")
+    private IssueManagement issueManagement;
+
+    @Column(name = "scm")
+    private Scm scm;
+
+    @Column(name = "issueManagement")
+    private CiManagement ciManagement;
+
+    // FIXME store those values in a separate table
+    //private List<License> licenses = new ArrayList<License>();
+
+    //private List<MailingList> mailingLists = new ArrayList<MailingList>();
+
+    //private List<Dependency> dependencies = new ArrayList<Dependency>();
+
+    @Column(name = "incomplete")
+    private boolean incomplete;
+
+    public String getRowId()
+    {
+        return rowId;
+    }
+
+    public void setRowId( String rowId )
+    {
+        this.rowId = rowId;
+    }
+
+    public String getId()
+    {
+        return id;
+    }
+
+    public void setId( String id )
+    {
+        this.id = id;
+    }
+
+    public String getUrl()
+    {
+        return url;
+    }
+
+    public void setUrl( String url )
+    {
+        this.url = url;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    public Organization getOrganization()
+    {
+        return organization;
+    }
+
+    public void setOrganization( Organization organization )
+    {
+        this.organization = organization;
+    }
+
+    public IssueManagement getIssueManagement()
+    {
+        return issueManagement;
+    }
+
+    public void setIssueManagement( IssueManagement issueManagement )
+    {
+        this.issueManagement = issueManagement;
+    }
+
+    public Scm getScm()
+    {
+        return scm;
+    }
+
+    public void setScm( Scm scm )
+    {
+        this.scm = scm;
+    }
+
+    public CiManagement getCiManagement()
+    {
+        return ciManagement;
+    }
+
+    public void setCiManagement( CiManagement ciManagement )
+    {
+        this.ciManagement = ciManagement;
+    }
+
+    public boolean isIncomplete()
+    {
+        return incomplete;
+    }
+
+    public void setIncomplete( boolean incomplete )
+    {
+        this.incomplete = incomplete;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o )
+        {
+            return true;
+        }
+        if ( o == null || getClass() != o.getClass() )
+        {
+            return false;
+        }
+
+        ProjectVersionMetadataModel that = (ProjectVersionMetadataModel) o;
+
+        if ( !rowId.equals( that.rowId ) )
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return rowId.hashCode();
+    }
+
+    public static class KeyBuilder
+    {
+
+        private String namespace;
+
+        private String repositoryId;
+
+        private String projectId;
+
+        private String id;
+
+        public KeyBuilder()
+        {
+
+        }
+
+        public KeyBuilder withNamespace( Namespace namespace )
+        {
+            this.namespace = namespace.getId();
+            this.repositoryId = namespace.getRepository().getId();
+            return this;
+        }
+
+        public KeyBuilder withNamespace( String namespace )
+        {
+            this.namespace = namespace;
+            return this;
+        }
+
+        public KeyBuilder withRepository( String repositoryId )
+        {
+            this.repositoryId = repositoryId;
+            return this;
+        }
+
+        public KeyBuilder withRepository( Repository repository )
+        {
+            this.repositoryId = repository.getId();
+            return this;
+        }
+
+        public KeyBuilder withProjectId( String projectId )
+        {
+            this.projectId = projectId;
+            return this;
+        }
+
+        public KeyBuilder withId( String id )
+        {
+            this.id = id;
+            return this;
+        }
+
+        public String build()
+        {
+            // FIXME add some controls
+            return this.repositoryId + "-" + this.namespace + "-" + this.projectId + "-" + this.id;
+        }
+    }
+}

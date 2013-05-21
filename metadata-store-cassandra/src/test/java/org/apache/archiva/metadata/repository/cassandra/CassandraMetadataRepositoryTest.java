@@ -25,6 +25,7 @@ import org.apache.archiva.metadata.repository.cassandra.model.ArtifactMetadataMo
 import org.apache.archiva.metadata.repository.cassandra.model.MetadataFacetModel;
 import org.apache.archiva.metadata.repository.cassandra.model.Namespace;
 import org.apache.archiva.metadata.repository.cassandra.model.Project;
+import org.apache.archiva.metadata.repository.cassandra.model.ProjectVersionMetadataModel;
 import org.apache.archiva.metadata.repository.cassandra.model.Repository;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -47,7 +48,7 @@ public class CassandraMetadataRepositoryTest
     private Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Inject
-    @Named(value = "archivaEntityManagerFactory#cassandra")
+    @Named( value = "archivaEntityManagerFactory#cassandra" )
     CassandraEntityManagerFactory cassandraEntityManagerFactory;
 
     CassandraMetadataRepository cmr;
@@ -100,6 +101,10 @@ public class CassandraMetadataRepositoryTest
 
         List<MetadataFacetModel> metadataFacetModels = cmr.getMetadataFacetModelEntityManager().getAll();
         cmr.getMetadataFacetModelEntityManager().remove( metadataFacetModels );
+
+        List<ProjectVersionMetadataModel> projectVersionMetadataModels =
+            cmr.getProjectVersionMetadataModelEntityManager().getAll();
+        cmr.getProjectVersionMetadataModelEntityManager().remove( projectVersionMetadataModels );
 
     }
 

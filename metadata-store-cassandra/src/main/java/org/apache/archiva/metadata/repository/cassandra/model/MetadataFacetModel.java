@@ -178,6 +178,8 @@ public class MetadataFacetModel
 
         private String facetId;
 
+        private String repositoryId;
+
         public KeyBuilder()
         {
 
@@ -207,10 +209,20 @@ public class MetadataFacetModel
             return this;
         }
 
+        public KeyBuilder withRepositoryId( String repositoryId )
+        {
+            this.repositoryId = repositoryId;
+            return this;
+        }
+
         public String build()
         {
             // FIXME add some controls
-            return this.artifactMetadataModel.getArtifactMetadataModelId() + "-" + this.facetId + "-" + this.name + "-"
+            // getArtifactMetadataModelId can have no namespace, no project and no projectid for statistics
+            // only repositoryId with artifactMetadataModel
+            return ( this.artifactMetadataModel == null
+                ? this.repositoryId
+                : this.artifactMetadataModel.getArtifactMetadataModelId() ) + "-" + this.facetId + "-" + this.name + "-"
                 + this.key;
         }
     }
