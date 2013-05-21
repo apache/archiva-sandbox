@@ -20,6 +20,9 @@ package org.apache.archiva.metadata.repository.cassandra;
  */
 
 import org.apache.archiva.metadata.repository.AbstractMetadataRepositoryTest;
+import org.apache.archiva.metadata.repository.cassandra.model.Namespace;
+import org.apache.archiva.metadata.repository.cassandra.model.Project;
+import org.apache.archiva.metadata.repository.cassandra.model.Repository;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -29,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
+import java.util.List;
 
 /**
  * @author Olivier Lamy
@@ -39,8 +43,10 @@ public class CassandraMetadataRepositoryTest
     private Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Inject
-    @Named( value = "archivaEntityManagerFactory#cassandra" )
+    @Named(value = "archivaEntityManagerFactory#cassandra")
     CassandraEntityManagerFactory cassandraEntityManagerFactory;
+
+    CassandraMetadataRepository cmr;
 
     @Before
     public void setUp()
@@ -54,7 +60,8 @@ public class CassandraMetadataRepositoryTest
             FileUtils.deleteDirectory( directory );
         }
 
-        this.repository = new CassandraMetadataRepository( null, null, cassandraEntityManagerFactory.getKeyspace() );
+        this.cmr = new CassandraMetadataRepository( null, null, cassandraEntityManagerFactory.getKeyspace() );
+        this.repository = this.cmr;
     }
 
 
@@ -63,6 +70,23 @@ public class CassandraMetadataRepositoryTest
         throws Exception
     {
         //cassandraEntityManagerFactory.getKeyspace().dr .dropKeyspace();
+    }
+
+    protected void clearReposAndNamespace()
+        throws Exception
+    {
+        List<Project> projects = cmr.getProjectEntityManager().getAll();
+
+        cmr.getProjectEntityManager().remove( projects );
+
+        List<Namespace> namespaces = cmr.getNamespaceEntityManager().getAll();
+
+        cmr.getNamespaceEntityManager().remove( namespaces );
+
+        List<Repository> repositories = cmr.getRepositoryEntityManager().getAll();
+
+        cmr.getRepositoryEntityManager().remove( repositories );
+
     }
 
 }

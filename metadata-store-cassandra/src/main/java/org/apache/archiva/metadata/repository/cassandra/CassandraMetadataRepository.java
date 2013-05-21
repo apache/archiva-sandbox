@@ -172,6 +172,16 @@ public class CassandraMetadataRepository
         this.namespaceEntityManager = namespaceEntityManager;
     }
 
+    public EntityManager<Project, String> getProjectEntityManager()
+    {
+        return projectEntityManager;
+    }
+
+    public void setProjectEntityManager( EntityManager<Project, String> projectEntityManager )
+    {
+        this.projectEntityManager = projectEntityManager;
+    }
+
     @Override
     public void updateNamespace( String repositoryId, String namespaceId )
         throws MetadataRepositoryException

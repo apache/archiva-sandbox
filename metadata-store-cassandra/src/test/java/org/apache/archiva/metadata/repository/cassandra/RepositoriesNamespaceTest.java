@@ -20,6 +20,7 @@ package org.apache.archiva.metadata.repository.cassandra;
  */
 
 import org.apache.archiva.metadata.repository.cassandra.model.Namespace;
+import org.apache.archiva.metadata.repository.cassandra.model.Project;
 import org.apache.archiva.metadata.repository.cassandra.model.Repository;
 import org.apache.archiva.test.utils.ArchivaSpringJUnit4ClassRunner;
 import org.fest.assertions.api.Assertions;
@@ -33,19 +34,20 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.List;
 
 /**
  * @author Olivier Lamy
  */
-@RunWith( ArchivaSpringJUnit4ClassRunner.class )
-@ContextConfiguration( locations = { "classpath*:/META-INF/spring-context.xml", "classpath*:/spring-context.xml" } )
+@RunWith(ArchivaSpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath*:/META-INF/spring-context.xml", "classpath*:/spring-context.xml" })
 public class RepositoriesNamespaceTest
 {
 
     private Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Inject
-    @Named( value = "archivaEntityManagerFactory#cassandra" )
+    @Named(value = "archivaEntityManagerFactory#cassandra")
     CassandraEntityManagerFactory cassandraEntityManagerFactory;
 
 
@@ -57,6 +59,7 @@ public class RepositoriesNamespaceTest
     {
 
         cmr = new CassandraMetadataRepository( null, null, cassandraEntityManagerFactory.getKeyspace() );
+        clearReposAndNamespace();
 
     }
 
@@ -64,7 +67,7 @@ public class RepositoriesNamespaceTest
     public void shutdown()
         throws Exception
     {
-
+        clearReposAndNamespace();
     }
 
 
@@ -114,9 +117,17 @@ public class RepositoriesNamespaceTest
     protected void clearReposAndNamespace()
         throws Exception
     {
-        if ( true )
-        {
-            return;
-        }
+        List<Project> projects = cmr.getProjectEntityManager().getAll();
+
+        cmr.getProjectEntityManager().remove( projects );
+
+        List<Namespace> namespaces = cmr.getNamespaceEntityManager().getAll();
+
+        cmr.getNamespaceEntityManager().remove( namespaces );
+
+        List<Repository> repositories = cmr.getRepositoryEntityManager().getAll();
+
+        cmr.getRepositoryEntityManager().remove( repositories );
+
     }
 }
