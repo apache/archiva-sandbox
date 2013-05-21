@@ -19,7 +19,10 @@ package org.apache.archiva.metadata.repository.cassandra;
  * under the License.
  */
 
+import org.apache.archiva.metadata.model.MetadataFacetFactory;
 import org.apache.archiva.metadata.repository.AbstractMetadataRepositoryTest;
+import org.apache.archiva.metadata.repository.cassandra.model.ArtifactMetadataModel;
+import org.apache.archiva.metadata.repository.cassandra.model.MetadataFacetModel;
 import org.apache.archiva.metadata.repository.cassandra.model.Namespace;
 import org.apache.archiva.metadata.repository.cassandra.model.Project;
 import org.apache.archiva.metadata.repository.cassandra.model.Repository;
@@ -33,6 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Olivier Lamy
@@ -60,8 +64,12 @@ public class CassandraMetadataRepositoryTest
             FileUtils.deleteDirectory( directory );
         }
 
-        this.cmr = new CassandraMetadataRepository( null, null, cassandraEntityManagerFactory.getKeyspace() );
+        Map<String, MetadataFacetFactory> factories = createTestMetadataFacetFactories();
+
+        this.cmr = new CassandraMetadataRepository( factories, null, cassandraEntityManagerFactory.getKeyspace() );
         this.repository = this.cmr;
+
+        clearReposAndNamespace();
     }
 
 
@@ -69,7 +77,7 @@ public class CassandraMetadataRepositoryTest
     public void shutdown()
         throws Exception
     {
-        //cassandraEntityManagerFactory.getKeyspace().dr .dropKeyspace();
+        clearReposAndNamespace();
     }
 
     protected void clearReposAndNamespace()
@@ -86,6 +94,12 @@ public class CassandraMetadataRepositoryTest
         List<Repository> repositories = cmr.getRepositoryEntityManager().getAll();
 
         cmr.getRepositoryEntityManager().remove( repositories );
+
+        List<ArtifactMetadataModel> artifactMetadataModels = cmr.getArtifactMetadataModelEntityManager().getAll();
+        cmr.getArtifactMetadataModelEntityManager().remove( artifactMetadataModels );
+
+        List<MetadataFacetModel> metadataFacetModels = cmr.getMetadataFacetModelEntityManager().getAll();
+        cmr.getMetadataFacetModelEntityManager().remove( metadataFacetModels );
 
     }
 

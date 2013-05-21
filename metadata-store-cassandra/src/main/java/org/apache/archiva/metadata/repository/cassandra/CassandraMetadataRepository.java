@@ -35,6 +35,8 @@ import org.apache.archiva.metadata.model.ProjectVersionReference;
 import org.apache.archiva.metadata.repository.MetadataRepository;
 import org.apache.archiva.metadata.repository.MetadataRepositoryException;
 import org.apache.archiva.metadata.repository.MetadataResolutionException;
+import org.apache.archiva.metadata.repository.cassandra.model.ArtifactMetadataModel;
+import org.apache.archiva.metadata.repository.cassandra.model.MetadataFacetModel;
 import org.apache.archiva.metadata.repository.cassandra.model.Namespace;
 import org.apache.archiva.metadata.repository.cassandra.model.Project;
 import org.apache.archiva.metadata.repository.cassandra.model.Repository;
@@ -47,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +76,10 @@ public class CassandraMetadataRepository
     private EntityManager<Namespace, String> namespaceEntityManager;
 
     private EntityManager<Project, String> projectEntityManager;
+
+    private EntityManager<ArtifactMetadataModel, String> artifactMetadataModelEntityManager;
+
+    private EntityManager<MetadataFacetModel, String> metadataFacetModelEntityManager;
 
     public CassandraMetadataRepository( Map<String, MetadataFacetFactory> metadataFacetFactories,
                                         ArchivaConfiguration configuration, Keyspace keyspace )
@@ -124,6 +131,27 @@ public class CassandraMetadataRepository
             {
                 projectEntityManager.createStorage( null );
             }
+
+            artifactMetadataModelEntityManager =
+                new DefaultEntityManager.Builder<ArtifactMetadataModel, String>().withEntityType(
+                    ArtifactMetadataModel.class ).withKeyspace( keyspace ).build();
+
+            exists = columnFamilyExists( "artifactmetadatamodel" );
+            if ( !exists )
+            {
+                artifactMetadataModelEntityManager.createStorage( null );
+            }
+
+            metadataFacetModelEntityManager =
+                new DefaultEntityManager.Builder<MetadataFacetModel, String>().withEntityType(
+                    MetadataFacetModel.class ).withKeyspace( keyspace ).build();
+
+            exists = columnFamilyExists( "metadatafacetmodel" );
+            if ( !exists )
+            {
+                metadataFacetModelEntityManager.createStorage( null );
+            }
+
         }
         catch ( PersistenceException e )
         {
@@ -180,6 +208,28 @@ public class CassandraMetadataRepository
     public void setProjectEntityManager( EntityManager<Project, String> projectEntityManager )
     {
         this.projectEntityManager = projectEntityManager;
+    }
+
+    public EntityManager<ArtifactMetadataModel, String> getArtifactMetadataModelEntityManager()
+    {
+        return artifactMetadataModelEntityManager;
+    }
+
+    public void setArtifactMetadataModelEntityManager(
+        EntityManager<ArtifactMetadataModel, String> artifactMetadataModelEntityManager )
+    {
+        this.artifactMetadataModelEntityManager = artifactMetadataModelEntityManager;
+    }
+
+    public EntityManager<MetadataFacetModel, String> getMetadataFacetModelEntityManager()
+    {
+        return metadataFacetModelEntityManager;
+    }
+
+    public void setMetadataFacetModelEntityManager(
+        EntityManager<MetadataFacetModel, String> metadataFacetModelEntityManager )
+    {
+        this.metadataFacetModelEntityManager = metadataFacetModelEntityManager;
     }
 
     @Override
@@ -463,11 +513,74 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public void updateArtifact( String repositoryId, String namespace, String projectId, String projectVersion,
+    public void updateArtifact( String repositoryId, String namespaceId, String projectId, String projectVersion,
                                 ArtifactMetadata artifactMeta )
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // TODO verif repository namespace exists ?
+        String key =
+            new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repositoryId ).withNamespace( namespaceId ).withId(
+                projectId ).withProjectVersion( projectVersion ).build();
+
+        ArtifactMetadataModel artifactMetadataModel = artifactMetadataModelEntityManager.get( key );
+        if ( artifactMetadataModel == null )
+        {
+            artifactMetadataModel =
+                new ArtifactMetadataModel( key, projectId, repositoryId, namespaceId, artifactMeta.getProject(),
+                                           projectVersion, artifactMeta.getVersion(),
+                                           artifactMeta.getFileLastModified(), artifactMeta.getSize(),
+                                           artifactMeta.getMd5(), artifactMeta.getSha1(),
+                                           artifactMeta.getWhenGathered() );
+            artifactMetadataModelEntityManager.put( artifactMetadataModel );
+
+        }
+
+        // now facets
+        // iterate over available facets to update/add/remove from the artifactMetadata
+        for ( final String facetId : metadataFacetFactories.keySet() )
+        {
+            MetadataFacet metadataFacet = artifactMeta.getFacet( facetId );
+            if ( metadataFacet == null )
+            {
+                continue;
+            }
+            // clean first
+
+            final List<MetadataFacetModel> metadataFacetModels = new ArrayList<MetadataFacetModel>();
+
+            metadataFacetModelEntityManager.visitAll( new Function<MetadataFacetModel, Boolean>()
+            {
+                @Override
+                public Boolean apply( MetadataFacetModel metadataFacetModel )
+                {
+                    if ( StringUtils.equals( metadataFacetModel.getFacetId(), facetId ) )
+                    {
+                        metadataFacetModels.add( metadataFacetModel );
+                    }
+                    return Boolean.TRUE;
+                }
+            } );
+
+            metadataFacetModelEntityManager.remove( metadataFacetModels );
+
+            Map<String, String> properties = metadataFacet.toProperties();
+
+            final List<MetadataFacetModel> metadataFacetModelsToAdd =
+                new ArrayList<MetadataFacetModel>( properties.size() );
+
+            for ( Map.Entry<String, String> entry : properties.entrySet() )
+            {
+                key = new MetadataFacetModel.KeyBuilder().withKey( entry.getKey() ).withArtifactMetadataModel(
+                    artifactMetadataModel ).withFacetId( facetId ).build();
+                MetadataFacetModel metadataFacetModel =
+                    new MetadataFacetModel( key, artifactMetadataModel, facetId, entry.getKey(), entry.getValue(),
+                                            metadataFacet.getName() );
+            }
+
+            metadataFacetModelEntityManager.put( metadataFacetModels );
+
+        }
+
     }
 
     @Override
@@ -475,28 +588,88 @@ public class CassandraMetadataRepository
                                       ProjectVersionMetadata versionMetadata )
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        foo
+    }
+
+    private static class BooleanHolder
+    {
+        private boolean value;
     }
 
     @Override
-    public List<String> getMetadataFacets( String repositoryId, String facetId )
+    public List<String> getMetadataFacets( final String repositoryId, final String facetId )
         throws MetadataRepositoryException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        // FIXME use cql query !!
+        final List<String> facets = new ArrayList<String>();
+        this.metadataFacetModelEntityManager.visitAll( new Function<MetadataFacetModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( MetadataFacetModel metadataFacetModel )
+            {
+                if ( metadataFacetModel != null )
+                {
+                    if ( StringUtils.equals( metadataFacetModel.getArtifactMetadataModel().getRepositoryId(),
+                                             repositoryId ) && StringUtils.equals( metadataFacetModel.getFacetId(),
+                                                                                   facetId ) )
+                    {
+                        facets.add( metadataFacetModel.getName() );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        return facets;
+
     }
 
     @Override
     public boolean hasMetadataFacet( String repositoryId, String facetId )
         throws MetadataRepositoryException
     {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return !getMetadataFacets( repositoryId, facetId ).isEmpty();
     }
 
     @Override
-    public MetadataFacet getMetadataFacet( String repositoryId, String facetId, String name )
+    public MetadataFacet getMetadataFacet( final String repositoryId, final String facetId, final String name )
         throws MetadataRepositoryException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        // FIXME use cql query !!
+        final List<MetadataFacetModel> facets = new ArrayList<MetadataFacetModel>();
+        this.metadataFacetModelEntityManager.visitAll( new Function<MetadataFacetModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( MetadataFacetModel metadataFacetModel )
+            {
+                if ( metadataFacetModel != null )
+                {
+                    if ( StringUtils.equals( metadataFacetModel.getArtifactMetadataModel().getRepositoryId(),
+                                             repositoryId ) && StringUtils.equals( metadataFacetModel.getFacetId(),
+                                                                                   facetId ) && StringUtils.equals(
+                        metadataFacetModel.getName(), name ) )
+                    {
+                        facets.add( metadataFacetModel );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        if ( facets.isEmpty() )
+        {
+            return null;
+        }
+
+        MetadataFacetFactory metadataFacetFactory = metadataFacetFactories.get( facetId );
+        MetadataFacet metadataFacet = metadataFacetFactory.createMetadataFacet( repositoryId, name );
+        Map<String, String> map = new HashMap<String, String>( facets.size() );
+        for ( MetadataFacetModel metadataFacetModel : facets )
+        {
+            map.put( metadataFacetModel.getKey(), metadataFacetModel.getValue() );
+        }
+        metadataFacet.fromProperties( map );
+        return metadataFacet;
     }
 
     @Override
