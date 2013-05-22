@@ -259,7 +259,9 @@ public class ProjectVersionMetadataModel
         public String build()
         {
             // FIXME add some controls
-            return this.repositoryId + "-" + this.namespace + "-" + this.projectId + "-" + this.id;
+            return this.repositoryId + "-" + this.namespace + "-" + this.projectId + ( this.id == null
+                ? ""
+                : "-" + this.id );
         }
     }
 }
