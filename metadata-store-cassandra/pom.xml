@@ -28,7 +28,7 @@
   </parent>
   <artifactId>metadata-store-jpa</artifactId>
   <packaging>bundle</packaging>
-  <name>Archiva Core Plugins :: JPA Storage for Metadata</name>
+  <name>Archiva Core Plugins :: Cassandra JPA Storage for Metadata</name>
 
   <dependencies>
     <dependency>
