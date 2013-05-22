@@ -1216,32 +1216,138 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public Collection<String> getProjectVersions( String repoId, String namespace, String projectId )
+    public Collection<String> getProjectVersions( final String repoId, final String namespace, final String projectId )
         throws MetadataResolutionException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        final Set<String> versions = new HashSet<String>();
+
+        // FIXME use cql query
+        artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
+            {
+                if ( artifactMetadataModel != null )
+                {
+                    if ( StringUtils.equals( repoId, artifactMetadataModel.getRepositoryId() ) && StringUtils.equals(
+                        namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
+                                                                                                 artifactMetadataModel.getId() ) )
+                    {
+                        versions.add( artifactMetadataModel.getVersion() );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        return versions;
     }
 
     @Override
-    public void removeProjectVersion( String repoId, String namespace, String projectId, String projectVersion )
+    public void removeProjectVersion( final String repoId, final String namespace, final String projectId,
+                                      final String projectVersion )
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+
+        String key =
+            new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repoId ).withNamespace( namespace ).withId(
+                projectId ).withProjectVersion( projectVersion ).build();
+
+        ArtifactMetadataModel artifactMetadataModel = artifactMetadataModelEntityManager.get( key );
+
+        if ( artifactMetadataModel == null )
+        {
+            logger.debug( "removeProjectVersion not found" );
+            return;
+        }
+
+        logger.debug( "removeProjectVersion" );
+
+        artifactMetadataModelEntityManager.remove( artifactMetadataModel );
+
+        /*
+
+        final List<ArtifactMetadataModel> versions = new ArrayList<ArtifactMetadataModel>();
+
+        // FIXME use cql query
+        artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
+            {
+                if ( artifactMetadataModel != null )
+                {
+                    if ( StringUtils.equals( repoId, artifactMetadataModel.getRepositoryId() ) && StringUtils.equals(
+                        namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
+                                                                                                 artifactMetadataModel.getId() )
+                        && StringUtils.equals( projectId,
+                                               artifactMetadataModel.getProjectVersion() )
+                        )
+                    {
+                        versions.add( artifactMetadataModel );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        artifactMetadataModelEntityManager.remove( versions );
+        */
     }
 
     @Override
-    public Collection<ArtifactMetadata> getArtifacts( String repoId, String namespace, String projectId,
-                                                      String projectVersion )
+    public Collection<ArtifactMetadata> getArtifacts( final String repoId, final String namespace,
+                                                      final String projectId, final String projectVersion )
         throws MetadataResolutionException
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        final List<ArtifactMetadataModel> artifactMetadataModels = new ArrayList<ArtifactMetadataModel>();
+        // FIXME use cql query !
+        artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
+            {
+                if ( artifactMetadataModel != null )
+                {
+                    if ( StringUtils.equals( repoId, artifactMetadataModel.getRepositoryId() ) && StringUtils.equals(
+                        namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
+                                                                                                 artifactMetadataModel.getProject() )
+                        && StringUtils.equals( projectVersion, artifactMetadataModel.getProjectVersion() ) )
+                    {
+                        artifactMetadataModels.add( artifactMetadataModel );
+                    }
+                }
+
+                return Boolean.TRUE;
+            }
+        } );
+
+        List<ArtifactMetadata> artifactMetadatas = new ArrayList<ArtifactMetadata>( artifactMetadataModels.size() );
+
+        for ( ArtifactMetadataModel model : artifactMetadataModels )
+        {
+            ArtifactMetadata artifactMetadata = new BeanReplicator().replicateBean( model, ArtifactMetadata.class );
+            populateFacets( artifactMetadata );
+            artifactMetadatas.add( artifactMetadata );
+        }
+
+        return artifactMetadatas;
     }
 
     @Override
     public void removeProject( String repositoryId, String namespace, String projectId )
         throws MetadataRepositoryException
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        String key = new Project.KeyBuilder().withNamespace(
+            new Namespace( namespace, new Repository( repositoryId ) ) ).withProjectId( projectId ).build();
+        Project project = projectEntityManager.get( key );
+        if ( project == null )
+        {
+            logger.debug( "removeProject notfound" );
+            return;
+        }
+        logger.debug( "removeProject {}", project );
+        projectEntityManager.remove( project );
     }
 
     @Override
