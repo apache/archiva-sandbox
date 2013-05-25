@@ -70,7 +70,7 @@ public class CassandraMetadataRepositoryTest
         this.cmr = new CassandraMetadataRepository( factories, null, cassandraEntityManagerFactory.getKeyspace() );
         this.repository = this.cmr;
 
-        clearReposAndNamespace();
+        //clearReposAndNamespace();
     }
 
 
