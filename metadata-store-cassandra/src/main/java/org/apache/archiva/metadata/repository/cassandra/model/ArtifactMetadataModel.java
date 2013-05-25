@@ -58,7 +58,7 @@ public class ArtifactMetadataModel
     private String version;
 
     @Column( name = "fileLastModified" )
-    private Date fileLastModified;
+    private long fileLastModified;
 
     @Column( name = "size" )
     private long size;
@@ -88,7 +88,7 @@ public class ArtifactMetadataModel
         this.project = project;
         this.projectVersion = projectVersion;
         this.version = version;
-        this.fileLastModified = fileLastModified;
+        this.fileLastModified = fileLastModified.getTime();
         this.size = size;
         this.md5 = md5;
         this.sha1 = sha1;
@@ -165,12 +165,12 @@ public class ArtifactMetadataModel
         this.version = version;
     }
 
-    public Date getFileLastModified()
+    public long getFileLastModified()
     {
         return fileLastModified;
     }
 
-    public void setFileLastModified( Date fileLastModified )
+    public void setFileLastModified( long fileLastModified )
     {
         this.fileLastModified = fileLastModified;
     }

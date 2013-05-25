@@ -552,12 +552,12 @@ public class CassandraMetadataRepository
         ArtifactMetadataModel artifactMetadataModel = artifactMetadataModelEntityManager.get( key );
         if ( artifactMetadataModel == null )
         {
-            artifactMetadataModel =
-                new ArtifactMetadataModel( key, projectId, repositoryId, namespaceId, artifactMeta.getProject(),
-                                           projectVersion, artifactMeta.getVersion(),
-                                           artifactMeta.getFileLastModified(), artifactMeta.getSize(),
-                                           artifactMeta.getMd5(), artifactMeta.getSha1(),
-                                           artifactMeta.getWhenGathered() );
+            artifactMetadataModel = new ArtifactMetadataModel( key, artifactMeta.getId(), repositoryId, namespaceId,
+                                                               artifactMeta.getProject(), projectVersion,
+                                                               artifactMeta.getVersion(),
+                                                               artifactMeta.getFileLastModified(),
+                                                               artifactMeta.getSize(), artifactMeta.getMd5(),
+                                                               artifactMeta.getSha1(), artifactMeta.getWhenGathered() );
             artifactMetadataModelEntityManager.put( artifactMetadataModel );
 
         }
@@ -860,7 +860,8 @@ public class CassandraMetadataRepository
                     {
 
                         Date when = artifactMetadataModel.getWhenGathered();
-                        if ( when.getTime() >= startTime.getTime() && when.getTime() <= endTime.getTime() )
+                        if ( ( startTime != null ? when.getTime() >= startTime.getTime() : true ) && ( endTime != null ?
+                            when.getTime() <= endTime.getTime() : true ) )
                         {
                             artifactMetadataModels.add( artifactMetadataModel );
                         }
