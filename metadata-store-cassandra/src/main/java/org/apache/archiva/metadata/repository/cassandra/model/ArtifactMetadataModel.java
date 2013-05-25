@@ -39,38 +39,38 @@ public class ArtifactMetadataModel
     @Id
     private String artifactMetadataModelId;
 
-    @Column( name = "id" )
+    @Column(name = "id")
     private String id;
 
-    @Column( name = "repositoryId" )
+    @Column(name = "repositoryId")
     private String repositoryId;
 
-    @Column( name = "namespace" )
+    @Column(name = "namespace")
     private String namespace;
 
-    @Column( name = "project" )
+    @Column(name = "project")
     private String project;
 
-    @Column( name = "projectVersion" )
+    @Column(name = "projectVersion")
     private String projectVersion;
 
-    @Column( name = "version" )
+    @Column(name = "version")
     private String version;
 
-    @Column( name = "fileLastModified" )
+    @Column(name = "fileLastModified")
     private long fileLastModified;
 
-    @Column( name = "size" )
+    @Column(name = "size")
     private long size;
 
-    @Column( name = "md5" )
+    @Column(name = "md5")
     private String md5;
 
-    @Column( name = "sha1" )
+    @Column(name = "sha1")
     private String sha1;
 
-    @Column( name = "whenGathered" )
-    private Date whenGathered;
+    @Column(name = "whenGathered")
+    private long whenGathered;
 
     public ArtifactMetadataModel()
     {
@@ -88,11 +88,11 @@ public class ArtifactMetadataModel
         this.project = project;
         this.projectVersion = projectVersion;
         this.version = version;
-        this.fileLastModified = fileLastModified.getTime();
+        this.fileLastModified = ( fileLastModified != null ? fileLastModified.getTime() : 0 );
         this.size = size;
         this.md5 = md5;
         this.sha1 = sha1;
-        this.whenGathered = whenGathered;
+        this.whenGathered = whenGathered != null ? whenGathered.getTime() : new Date().getTime();
     }
 
     public String getArtifactMetadataModelId()
@@ -207,10 +207,10 @@ public class ArtifactMetadataModel
 
     public Date getWhenGathered()
     {
-        return whenGathered;
+        return new Date( whenGathered );
     }
 
-    public void setWhenGathered( Date whenGathered )
+    public void setWhenGathered( long whenGathered )
     {
         this.whenGathered = whenGathered;
     }
