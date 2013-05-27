@@ -543,7 +543,7 @@ public class CassandraMetadataRepository
                                 ArtifactMetadata artifactMeta )
         throws MetadataRepositoryException
     {
-        // TODO verif repository namespace exists ?
+        updateNamespace( repositoryId, namespaceId );
 
         String key =
             new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repositoryId ).withNamespace( namespaceId ).withId(
