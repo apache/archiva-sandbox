@@ -558,9 +558,17 @@ public class CassandraMetadataRepository
                                                                artifactMeta.getFileLastModified(),
                                                                artifactMeta.getSize(), artifactMeta.getMd5(),
                                                                artifactMeta.getSha1(), artifactMeta.getWhenGathered() );
-            artifactMetadataModelEntityManager.put( artifactMetadataModel );
 
+        } else {
+            artifactMetadataModel.setFileLastModified( artifactMeta.getFileLastModified().getTime() );
+            artifactMetadataModel.setWhenGathered( artifactMeta.getWhenGathered().getTime() );
+            artifactMetadataModel.setSize( artifactMeta.getSize() );
+            artifactMetadataModel.setMd5( artifactMeta.getMd5() );
+            artifactMetadataModel.setSha1( artifactMeta.getSha1() );
+            artifactMetadataModel.setVersion( artifactMeta.getVersion() );
         }
+
+        artifactMetadataModelEntityManager.put( artifactMetadataModel );
 
         // now facets
         updateFacets( artifactMeta, artifactMetadataModel );
@@ -863,6 +871,7 @@ public class CassandraMetadataRepository
                         if ( ( startTime != null ? when.getTime() >= startTime.getTime() : true ) && ( endTime != null ?
                             when.getTime() <= endTime.getTime() : true ) )
                         {
+                            logger.debug( "getArtifactsByDateRange visitAll found: {}", artifactMetadataModel );
                             artifactMetadataModels.add( artifactMetadataModel );
                         }
                     }
@@ -944,6 +953,11 @@ public class CassandraMetadataRepository
         throws MetadataRepositoryException
     {
         final List<ArtifactMetadataModel> artifactMetadataModels = new ArrayList<ArtifactMetadataModel>();
+
+        if ( logger.isDebugEnabled() )
+        {
+            logger.debug( "all ArtifactMetadataModel: {}", artifactMetadataModelEntityManager.getAll() );
+        }
 
         // FIXME cql query
         artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()

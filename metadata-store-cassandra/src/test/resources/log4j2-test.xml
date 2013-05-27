@@ -33,11 +33,11 @@
   <loggers>
 
 
-    <asyncLogger name="org.apache.archiva" level="debug"/>
+    <logger name="org.apache.archiva.metadata.repository.cassandra.CassandraMetadataRepository" level="debug"/>
 
-    <asyncRoot level="info" includeLocation="true">
+    <root level="info" includeLocation="true">
       <appender-ref ref="console"/>
-    </asyncRoot>
+    </root>
   </loggers>
 </configuration>
 
