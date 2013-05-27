@@ -1381,7 +1381,7 @@ public class CassandraMetadataRepository
     @Override
     public void revert()
     {
-        logger.trace( "revert" );
+        logger.warn( "CassandraMetadataRepository cannot revert" );
     }
 
     @Override

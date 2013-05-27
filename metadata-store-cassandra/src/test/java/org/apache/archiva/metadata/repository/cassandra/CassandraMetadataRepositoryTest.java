@@ -78,7 +78,8 @@ public class CassandraMetadataRepositoryTest
     public void shutdown()
         throws Exception
     {
-        //clearReposAndNamespace();
+        clearReposAndNamespace();
+        super.tearDown();
     }
 
     protected void clearReposAndNamespace()
