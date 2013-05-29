@@ -38,31 +38,37 @@ public class ProjectVersionMetadataModel
     @Id
     private String rowId;
 
+    @Column( name = "namespace" )
+    private Namespace namespace;
+
     /**
      * id is the version
      */
     @Column( name = "id" )
     private String id;
 
-    @Column( name = "url" )
+    @Column( name = "projectId" )
+    private String projectId;
+
+    @Column(name = "url")
     private String url;
 
-    @Column( name = "name" )
+    @Column(name = "name")
     private String name;
 
-    @Column( name = "description" )
+    @Column(name = "description")
     private String description;
 
-    @Column( name = "organization" )
+    @Column(name = "organization")
     private Organization organization;
 
-    @Column( name = "issueManagement" )
+    @Column(name = "issueManagement")
     private IssueManagement issueManagement;
 
-    @Column( name = "scm" )
+    @Column(name = "scm")
     private Scm scm;
 
-    @Column( name = "issueManagement" )
+    @Column(name = "issueManagement")
     private CiManagement ciManagement;
 
     // FIXME store those values in a separate table
@@ -72,8 +78,18 @@ public class ProjectVersionMetadataModel
 
     //private List<Dependency> dependencies = new ArrayList<Dependency>();
 
-    @Column( name = "incomplete" )
+    @Column(name = "incomplete")
     private boolean incomplete;
+
+    public String getProjectId()
+    {
+        return projectId;
+    }
+
+    public void setProjectId( String projectId )
+    {
+        this.projectId = projectId;
+    }
 
     public String getRowId()
     {
@@ -175,6 +191,36 @@ public class ProjectVersionMetadataModel
         this.incomplete = incomplete;
     }
 
+    public Namespace getNamespace()
+    {
+        return namespace;
+    }
+
+    public void setNamespace( Namespace namespace )
+    {
+        this.namespace = namespace;
+    }
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder sb = new StringBuilder( "ProjectVersionMetadataModel{" );
+        sb.append( "rowId='" ).append( rowId ).append( '\'' );
+        sb.append( ", namespace=" ).append( namespace );
+        sb.append( ", id='" ).append( id ).append( '\'' );
+        sb.append( ", projectId='" ).append( projectId ).append( '\'' );
+        sb.append( ", url='" ).append( url ).append( '\'' );
+        sb.append( ", name='" ).append( name ).append( '\'' );
+        sb.append( ", description='" ).append( description ).append( '\'' );
+        sb.append( ", organization=" ).append( organization );
+        sb.append( ", issueManagement=" ).append( issueManagement );
+        sb.append( ", scm=" ).append( scm );
+        sb.append( ", ciManagement=" ).append( ciManagement );
+        sb.append( ", incomplete=" ).append( incomplete );
+        sb.append( '}' );
+        return sb.toString();
+    }
+
     @Override
     public boolean equals( Object o )
     {
@@ -196,6 +242,7 @@ public class ProjectVersionMetadataModel
 
         return true;
     }
+
 
     @Override
     public int hashCode()

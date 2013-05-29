@@ -522,8 +522,6 @@ public class CassandraMetadataRepository
             return;
         }
 
-        // FIXME really needed ?
-        // test if the namespace exist
         String namespaceKey = new Namespace.KeyBuilder().withRepositoryId( repositoryId ).withNamespace(
             projectMetadata.getNamespace() ).build();
         Namespace namespace = namespaceEntityManager.get( namespaceKey );
@@ -543,11 +541,17 @@ public class CassandraMetadataRepository
                                 ArtifactMetadata artifactMeta )
         throws MetadataRepositoryException
     {
-        updateNamespace( repositoryId, namespaceId );
+        String namespaceKey =
+            new Namespace.KeyBuilder().withRepositoryId( repositoryId ).withNamespace( namespaceId ).build();
+        Namespace namespace = namespaceEntityManager.get( namespaceKey );
+        if ( namespace == null )
+        {
+            updateNamespace( repositoryId, namespaceId );
+        }
 
-        String key =
-            new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repositoryId ).withNamespace( namespaceId ).withId(
-                projectId ).withProjectVersion( projectVersion ).build();
+        String key = new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repositoryId ).withNamespace(
+            namespaceId ).withProject( projectId ).withId( artifactMeta.getId() ).withProjectVersion(
+            projectVersion ).build();
 
         ArtifactMetadataModel artifactMetadataModel = artifactMetadataModelEntityManager.get( key );
         if ( artifactMetadataModel == null )
@@ -559,7 +563,9 @@ public class CassandraMetadataRepository
                                                                artifactMeta.getSize(), artifactMeta.getMd5(),
                                                                artifactMeta.getSha1(), artifactMeta.getWhenGathered() );
 
-        } else {
+        }
+        else
+        {
             artifactMetadataModel.setFileLastModified( artifactMeta.getFileLastModified().getTime() );
             artifactMetadataModel.setWhenGathered( artifactMeta.getWhenGathered().getTime() );
             artifactMetadataModel.setSize( artifactMeta.getSize() );
@@ -573,6 +579,35 @@ public class CassandraMetadataRepository
         // now facets
         updateFacets( artifactMeta, artifactMetadataModel );
 
+    }
+
+    @Override
+    public Collection<String> getArtifactVersions( final String repoId, final String namespace, final String projectId,
+                                                   final String projectVersion )
+        throws MetadataResolutionException
+    {
+        final List<String> versions = new ArrayList<String>();
+        // FIXME use cql query
+        artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
+            {
+                if ( artifactMetadataModel != null )
+                {
+                    if ( StringUtils.equals( repoId, artifactMetadataModel.getRepositoryId() ) && StringUtils.equals(
+                        namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
+                                                                                                 artifactMetadataModel.getProject() )
+                        && StringUtils.equals( projectVersion, artifactMetadataModel.getProjectVersion() ) )
+                    {
+                        versions.add( artifactMetadataModel.getVersion() );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        return versions;
     }
 
     /**
@@ -636,20 +671,32 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public void updateProjectVersion( String repositoryId, String namespace, String projectId,
+    public void updateProjectVersion( String repositoryId, String namespaceId, String projectId,
                                       ProjectVersionMetadata versionMetadata )
         throws MetadataRepositoryException
     {
+        String namespaceKey =
+            new Namespace.KeyBuilder().withRepositoryId( repositoryId ).withNamespace( namespaceId ).build();
+        Namespace namespace = namespaceEntityManager.get( namespaceKey );
+        if ( namespace == null )
+        {
+            updateNamespace( repositoryId, namespaceId );
+        }
+
         // we don't test of repository and namespace really exist !
         String key = new ProjectVersionMetadataModel.KeyBuilder().withRepository( repositoryId ).withNamespace(
-            namespace ).withProjectId( projectId ).withId( versionMetadata.getId() ).build();
+            namespaceId ).withProjectId( projectId ).withId( versionMetadata.getId() ).build();
 
         ProjectVersionMetadataModel projectVersionMetadataModel = projectVersionMetadataModelEntityManager.get( key );
 
-        projectVersionMetadataModel =
-            new BeanReplicator().replicateBean( versionMetadata, ProjectVersionMetadataModel.class );
-        projectVersionMetadataModel.setRowId( key );
-
+        if ( projectVersionMetadataModel == null )
+        {
+            projectVersionMetadataModel =
+                new BeanReplicator().replicateBean( versionMetadata, ProjectVersionMetadataModel.class );
+            projectVersionMetadataModel.setRowId( key );
+        }
+        projectVersionMetadataModel.setProjectId( projectId );
+        projectVersionMetadataModel.setNamespace( new Namespace( namespaceId, new Repository( repositoryId ) ) );
         projectVersionMetadataModel.setCiManagement( versionMetadata.getCiManagement() );
         projectVersionMetadataModel.setIssueManagement( versionMetadata.getIssueManagement() );
         projectVersionMetadataModel.setOrganization( versionMetadata.getOrganization() );
@@ -661,9 +708,10 @@ public class CassandraMetadataRepository
         ArtifactMetadataModel artifactMetadataModel = new ArtifactMetadataModel();
         artifactMetadataModel.setArtifactMetadataModelId(
             new ArtifactMetadataModel.KeyBuilder().withId( versionMetadata.getId() ).withRepositoryId(
-                repositoryId ).withNamespace( namespace ).withProjectVersion( versionMetadata.getVersion() ).build() );
+                repositoryId ).withNamespace( namespaceId ).withProjectVersion(
+                versionMetadata.getVersion() ).build() );
         artifactMetadataModel.setRepositoryId( repositoryId );
-        artifactMetadataModel.setNamespace( namespace );
+        artifactMetadataModel.setNamespace( namespaceId );
         artifactMetadataModel.setProject( projectId );
         // facets etc...
         updateFacets( versionMetadata, artifactMetadataModel );
@@ -1111,16 +1159,16 @@ public class CassandraMetadataRepository
 
         final BooleanHolder booleanHolder = new BooleanHolder();
 
-        projectEntityManager.visitAll( new Function<Project, Boolean>()
+        projectVersionMetadataModelEntityManager.visitAll( new Function<ProjectVersionMetadataModel, Boolean>()
         {
             @Override
-            public Boolean apply( Project project )
+            public Boolean apply( ProjectVersionMetadataModel project )
             {
                 if ( project != null )
                 {
                     if ( StringUtils.equals( repoId, project.getNamespace().getRepository().getName() )
                         && StringUtils.equals( namespace, project.getNamespace().getName() ) && StringUtils.equals(
-                        projectId, project.getId() ) )
+                        projectId, project.getProjectId() ) )
                     {
                         booleanHolder.value = true;
                     }
@@ -1128,6 +1176,11 @@ public class CassandraMetadataRepository
                 return Boolean.TRUE;
             }
         } );
+
+        if ( !booleanHolder.value )
+        {
+            return null;
+        }
 
         ProjectMetadata projectMetadata = new ProjectMetadata();
         projectMetadata.setId( projectId );
@@ -1149,6 +1202,11 @@ public class CassandraMetadataRepository
 
         ProjectVersionMetadataModel projectVersionMetadataModel = projectVersionMetadataModelEntityManager.get( key );
 
+        if ( projectVersionMetadataModel == null )
+        {
+            return null;
+        }
+
         ProjectVersionMetadata projectVersionMetadata =
             new BeanReplicator().replicateBean( projectVersionMetadataModel, ProjectVersionMetadata.class );
 
@@ -1165,34 +1223,6 @@ public class CassandraMetadataRepository
         return projectVersionMetadata;
     }
 
-    @Override
-    public Collection<String> getArtifactVersions( final String repoId, final String namespace, final String projectId,
-                                                   final String projectVersion )
-        throws MetadataResolutionException
-    {
-        final List<String> versions = new ArrayList<String>();
-        // FIXME use cql query
-        artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
-        {
-            @Override
-            public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
-            {
-                if ( artifactMetadataModel != null )
-                {
-                    if ( StringUtils.equals( repoId, artifactMetadataModel.getRepositoryId() ) && StringUtils.equals(
-                        namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
-                                                                                                 artifactMetadataModel.getId() )
-                        && StringUtils.equals( projectVersion, artifactMetadataModel.getProjectVersion() ) )
-                    {
-                        versions.add( artifactMetadataModel.getVersion() );
-                    }
-                }
-                return Boolean.TRUE;
-            }
-        } );
-
-        return versions;
-    }
 
     @Override
     public Collection<ProjectVersionReference> getProjectReferences( String repoId, String namespace, String projectId,

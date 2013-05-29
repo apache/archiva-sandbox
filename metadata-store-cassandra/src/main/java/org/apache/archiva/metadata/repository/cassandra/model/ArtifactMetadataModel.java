@@ -35,7 +35,7 @@ public class ArtifactMetadataModel
     implements Serializable
 {
 
-    // repositoryId + namespaceId + id + projectVersion
+    // repositoryId + namespaceId + project + projectVersion + id
     @Id
     private String artifactMetadataModelId;
 
@@ -266,6 +266,8 @@ public class ArtifactMetadataModel
     public static class KeyBuilder
     {
 
+        private String project;
+
         private String id;
 
         private String namespaceId;
@@ -299,6 +301,12 @@ public class ArtifactMetadataModel
             return this;
         }
 
+        public KeyBuilder withProject( String project )
+        {
+            this.project = project;
+            return this;
+        }
+
         public KeyBuilder withProjectVersion( String projectVersion )
         {
             this.projectVersion = projectVersion;
@@ -313,8 +321,10 @@ public class ArtifactMetadataModel
 
         public String build()
         {
+            //repositoryId + namespaceId + project + projectVersion + id
             // FIXME add some controls
-            return this.repositoryId + "-" + this.namespaceId + "-" + this.id + "-" + this.projectVersion;
+            return this.repositoryId + "-" + this.namespaceId + "-" + this.project + "-" + this.projectVersion
+                + this.id;
         }
     }
 
