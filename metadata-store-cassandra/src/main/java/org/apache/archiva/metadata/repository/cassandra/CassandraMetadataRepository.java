@@ -589,7 +589,14 @@ public class CassandraMetadataRepository
             artifactMetadataModel.setVersion( artifactMeta.getVersion() );
         }
 
-        artifactMetadataModelEntityManager.put( artifactMetadataModel );
+        try
+        {
+            artifactMetadataModelEntityManager.put( artifactMetadataModel );
+        }
+        catch ( PersistenceException e )
+        {
+            throw new MetadataRepositoryException( e.getMessage(), e );
+        }
 
         // now facets
         updateFacets( artifactMeta, artifactMetadataModel );
@@ -718,18 +725,25 @@ public class CassandraMetadataRepository
         projectVersionMetadataModel.setScm( versionMetadata.getScm() );
         // FIXME collections !!
 
-        projectVersionMetadataModelEntityManager.put( projectVersionMetadataModel );
+        try
+        {
+            projectVersionMetadataModelEntityManager.put( projectVersionMetadataModel );
 
-        ArtifactMetadataModel artifactMetadataModel = new ArtifactMetadataModel();
-        artifactMetadataModel.setArtifactMetadataModelId(
-            new ArtifactMetadataModel.KeyBuilder().withId( versionMetadata.getId() ).withRepositoryId(
-                repositoryId ).withNamespace( namespaceId ).withProjectVersion(
-                versionMetadata.getVersion() ).build() );
-        artifactMetadataModel.setRepositoryId( repositoryId );
-        artifactMetadataModel.setNamespace( namespaceId );
-        artifactMetadataModel.setProject( projectId );
-        // facets etc...
-        updateFacets( versionMetadata, artifactMetadataModel );
+            ArtifactMetadataModel artifactMetadataModel = new ArtifactMetadataModel();
+            artifactMetadataModel.setArtifactMetadataModelId(
+                new ArtifactMetadataModel.KeyBuilder().withId( versionMetadata.getId() ).withRepositoryId(
+                    repositoryId ).withNamespace( namespaceId ).withProjectVersion(
+                    versionMetadata.getVersion() ).build() );
+            artifactMetadataModel.setRepositoryId( repositoryId );
+            artifactMetadataModel.setNamespace( namespaceId );
+            artifactMetadataModel.setProject( projectId );
+            // facets etc...
+            updateFacets( versionMetadata, artifactMetadataModel );
+        }
+        catch ( PersistenceException e )
+        {
+            throw new MetadataRepositoryException( e.getMessage(), e );
+        }
     }
 
 
@@ -843,7 +857,14 @@ public class CassandraMetadataRepository
                 metadataFacetModel.setName( metadataFacetModel.getName() );
             }
             metadataFacetModel.setValue( entry.getValue() );
-            metadataFacetModelEntityManager.put( metadataFacetModel );
+            try
+            {
+                metadataFacetModelEntityManager.put( metadataFacetModel );
+            }
+            catch ( PersistenceException e )
+            {
+                throw new MetadataRepositoryException( e.getMessage(), e );
+            }
 
         }
     }
