@@ -818,6 +818,10 @@ public class CassandraMetadataRepository
         }
 
         MetadataFacetFactory metadataFacetFactory = metadataFacetFactories.get( facetId );
+        if ( metadataFacetFactory == null )
+        {
+            return null;
+        }
         MetadataFacet metadataFacet = metadataFacetFactory.createMetadataFacet( repositoryId, name );
         Map<String, String> map = new HashMap<String, String>( facets.size() );
         for ( MetadataFacetModel metadataFacetModel : facets )
@@ -1025,6 +1029,10 @@ public class CassandraMetadataRepository
         for ( Map.Entry<String, Map<String, String>> entry : facetValuesPerFacet.entrySet() )
         {
             MetadataFacetFactory factory = metadataFacetFactories.get( entry.getKey() );
+            if ( factory == null )
+            {
+                continue;
+            }
             MetadataFacet metadataFacet =
                 factory.createMetadataFacet( artifactMetadata.getRepositoryId(), entry.getKey() );
             metadataFacet.fromProperties( entry.getValue() );
