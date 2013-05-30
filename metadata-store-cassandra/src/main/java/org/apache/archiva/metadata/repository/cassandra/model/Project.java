@@ -32,13 +32,13 @@ public class Project
     implements Serializable
 {
     @Id
-    @Column( name = "projectId" )
+    @Column(name = "projectId")
     private String projectId;
 
-    @Column( name = "id" )
+    @Column(name = "id")
     private String id;
 
-    @Column( name = "repository" )
+    @Column(name = "repository")
     private Namespace namespace;
 
     public Project()
@@ -46,8 +46,9 @@ public class Project
         // no op
     }
 
-    public Project( String id, Namespace namespace )
+    public Project( String projectId, String id, Namespace namespace )
     {
+        this.projectId = projectId;
         this.id = id;
         this.namespace = namespace;
     }
@@ -70,6 +71,16 @@ public class Project
     public void setNamespace( Namespace namespace )
     {
         this.namespace = namespace;
+    }
+
+    public String getProjectId()
+    {
+        return projectId;
+    }
+
+    public void setProjectId( String projectId )
+    {
+        this.projectId = projectId;
     }
 
     @Override

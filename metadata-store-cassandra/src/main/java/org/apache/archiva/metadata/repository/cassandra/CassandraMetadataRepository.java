@@ -262,6 +262,13 @@ public class CassandraMetadataRepository
     public void updateNamespace( String repositoryId, String namespaceId )
         throws MetadataRepositoryException
     {
+        updateOrAddNamespace( repositoryId, namespaceId );
+
+    }
+
+    public Namespace updateOrAddNamespace( String repositoryId, String namespaceId )
+        throws MetadataRepositoryException
+    {
         try
         {
             Repository repository = this.repositoryEntityManager.get( repositoryId );
@@ -285,6 +292,7 @@ public class CassandraMetadataRepository
                 namespace = new Namespace( namespaceId, repository );
                 namespaceEntityManager.put( namespace );
             }
+            return namespace;
         }
         catch ( PersistenceException e )
         {
@@ -527,12 +535,19 @@ public class CassandraMetadataRepository
         Namespace namespace = namespaceEntityManager.get( namespaceKey );
         if ( namespace == null )
         {
-            updateNamespace( repositoryId, projectMetadata.getNamespace() );
+            namespace = updateOrAddNamespace( repositoryId, projectMetadata.getNamespace() );
         }
 
-        project = new Project( projectKey, namespace );
+        project = new Project( projectKey, projectMetadata.getId(), namespace );
 
-        projectEntityManager.put( project );
+        try
+        {
+            projectEntityManager.put( project );
+        }
+        catch ( PersistenceException e )
+        {
+            throw new MetadataRepositoryException( e.getMessage(), e );
+        }
 
     }
 
@@ -1151,7 +1166,7 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public ProjectMetadata getProject( final String repoId, final String namespace, final String projectId )
+    public ProjectMetadata getProject( final String repoId, final String namespace, final String id )
         throws MetadataResolutionException
     {
         //basically just checking it exists
@@ -1159,16 +1174,16 @@ public class CassandraMetadataRepository
 
         final BooleanHolder booleanHolder = new BooleanHolder();
 
-        projectVersionMetadataModelEntityManager.visitAll( new Function<ProjectVersionMetadataModel, Boolean>()
+        projectEntityManager.visitAll( new Function<Project, Boolean>()
         {
             @Override
-            public Boolean apply( ProjectVersionMetadataModel project )
+            public Boolean apply( Project project )
             {
                 if ( project != null )
                 {
                     if ( StringUtils.equals( repoId, project.getNamespace().getRepository().getName() )
-                        && StringUtils.equals( namespace, project.getNamespace().getName() ) && StringUtils.equals(
-                        projectId, project.getProjectId() ) )
+                        && StringUtils.equals( namespace, project.getNamespace().getName() ) && StringUtils.equals( id,
+                                                                                                                    project.getId() ) )
                     {
                         booleanHolder.value = true;
                     }
@@ -1183,10 +1198,10 @@ public class CassandraMetadataRepository
         }
 
         ProjectMetadata projectMetadata = new ProjectMetadata();
-        projectMetadata.setId( projectId );
+        projectMetadata.setId( id );
         projectMetadata.setNamespace( namespace );
 
-        logger.debug( "getProject repoId: {}, namespace: {}, projectId: {} -> {}", repoId, namespace, projectId,
+        logger.debug( "getProject repoId: {}, namespace: {}, projectId: {} -> {}", repoId, namespace, id,
                       projectMetadata );
 
         return projectMetadata;
