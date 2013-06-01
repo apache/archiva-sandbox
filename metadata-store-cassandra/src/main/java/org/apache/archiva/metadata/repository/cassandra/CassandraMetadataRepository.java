@@ -1518,27 +1518,10 @@ public class CassandraMetadataRepository
         throws MetadataRepositoryException
     {
 
-        String key =
-            new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repoId ).withNamespace( namespace ).withId(
-                projectId ).withProjectVersion( projectVersion ).build();
-
-        ArtifactMetadataModel artifactMetadataModel = artifactMetadataModelEntityManager.get( key );
-
-        if ( artifactMetadataModel == null )
-        {
-            logger.debug( "removeProjectVersion not found" );
-            return;
-        }
-
-        logger.debug( "removeProjectVersion" );
-
-        artifactMetadataModelEntityManager.remove( artifactMetadataModel );
-
-        /*
-
-        final List<ArtifactMetadataModel> versions = new ArrayList<ArtifactMetadataModel>();
+        final List<ArtifactMetadataModel> artifactMetadataModels = new ArrayList<ArtifactMetadataModel>();
 
         // FIXME use cql query
+
         artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
         {
             @Override
@@ -1548,20 +1531,23 @@ public class CassandraMetadataRepository
                 {
                     if ( StringUtils.equals( repoId, artifactMetadataModel.getRepositoryId() ) && StringUtils.equals(
                         namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
-                                                                                                 artifactMetadataModel.getId() )
-                        && StringUtils.equals( projectId,
-                                               artifactMetadataModel.getProjectVersion() )
-                        )
+                                                                                                 artifactMetadataModel.getProject() )
+                        && StringUtils.equals( projectVersion, artifactMetadataModel.getProjectVersion() ) )
                     {
-                        versions.add( artifactMetadataModel );
+                        artifactMetadataModels.add( artifactMetadataModel );
                     }
                 }
                 return Boolean.TRUE;
             }
         } );
 
-        artifactMetadataModelEntityManager.remove( versions );
-        */
+        logger.debug( "removeProjectVersions:{}", artifactMetadataModels );
+        if ( artifactMetadataModels.isEmpty() )
+        {
+            return;
+        }
+
+        artifactMetadataModelEntityManager.remove( artifactMetadataModels );
     }
 
     @Override
