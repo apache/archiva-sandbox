@@ -323,16 +323,103 @@ public class CassandraMetadataRepository
 
 
     @Override
-    public void removeRepository( String repositoryId )
+    public void removeRepository( final String repositoryId )
         throws MetadataRepositoryException
     {
         try
         {
+            final List<ArtifactMetadataModel> artifactMetadataModels = new ArrayList<ArtifactMetadataModel>();
+
+            // remove data related to the repository
+            this.artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
+            {
+                @Override
+                public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
+                {
+                    if ( artifactMetadataModel != null )
+                    {
+                        if ( StringUtils.equals( artifactMetadataModel.getRepositoryId(), repositoryId ) )
+                        {
+                            artifactMetadataModels.add( artifactMetadataModel );
+                        }
+                    }
+                    return Boolean.TRUE;
+                }
+            } );
+
+            artifactMetadataModelEntityManager.remove( artifactMetadataModels );
+
+            final List<Namespace> namespaces = new ArrayList<Namespace>();
+
+            namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
+            {
+                @Override
+                public Boolean apply( Namespace namespace )
+                {
+                    if ( namespace != null )
+                    {
+                        if ( StringUtils.equals( namespace.getRepository().getId(), repositoryId ) )
+                        {
+                            namespaces.add( namespace );
+                        }
+                    }
+                    return Boolean.TRUE;
+                }
+            } );
+
+            namespaceEntityManager.remove( namespaces );
+
+            final List<Project> projects = new ArrayList<Project>();
+            projectEntityManager.visitAll( new Function<Project, Boolean>()
+            {
+                @Override
+                public Boolean apply( Project project )
+                {
+                    if ( project != null )
+                    {
+                        if ( StringUtils.equals( project.getNamespace().getRepository().getId(), repositoryId ) )
+                        {
+                            projects.add( project );
+                        }
+                    }
+                    return Boolean.TRUE;
+                }
+            } );
+
+            projectEntityManager.remove( projects );
+
+            // TODO  cleanup or not
+            //final List<MetadataFacetModel> metadataFacetModels = new ArrayList<MetadataFacetModel>(  );
+            //metadataFacetModelEntityManager.visitAll( new Function<MetadataFacetModel, Boolean>()
+
+            final List<ProjectVersionMetadataModel> projectVersionMetadataModels =
+                new ArrayList<ProjectVersionMetadataModel>();
+
+            projectVersionMetadataModelEntityManager.visitAll( new Function<ProjectVersionMetadataModel, Boolean>()
+            {
+                @Override
+                public Boolean apply( ProjectVersionMetadataModel projectVersionMetadataModel )
+                {
+                    if ( projectVersionMetadataModel != null )
+                    {
+                        if ( StringUtils.equals( projectVersionMetadataModel.getNamespace().getRepository().getId(),
+                                                 repositoryId ) )
+                        {
+                            projectVersionMetadataModels.add( projectVersionMetadataModel );
+                        }
+                    }
+                    return Boolean.TRUE;
+                }
+            } );
+
+            projectVersionMetadataModelEntityManager.remove( projectVersionMetadataModels );
+
             Repository repository = repositoryEntityManager.get( repositoryId );
             if ( repository != null )
             {
                 repositoryEntityManager.remove( repository );
             }
+
         }
         catch ( PersistenceException e )
         {
@@ -558,15 +645,32 @@ public class CassandraMetadataRepository
     {
         String namespaceKey =
             new Namespace.KeyBuilder().withRepositoryId( repositoryId ).withNamespace( namespaceId ).build();
+        // create the namespace if not exists
         Namespace namespace = namespaceEntityManager.get( namespaceKey );
         if ( namespace == null )
         {
-            updateNamespace( repositoryId, namespaceId );
+            namespace = updateOrAddNamespace( repositoryId, namespaceId );
         }
 
-        String key = new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repositoryId ).withNamespace(
-            namespaceId ).withProject( projectId ).withId( artifactMeta.getId() ).withProjectVersion(
-            projectVersion ).build();
+        // create the project if not exist
+        String projectKey = new Project.KeyBuilder().withNamespace( namespace ).withProjectId( projectId ).build();
+
+        Project project = projectEntityManager.get( projectKey );
+        if ( project == null )
+        {
+            project = new Project( projectKey, projectId, namespace );
+            try
+            {
+                projectEntityManager.put( project );
+            }
+            catch ( PersistenceException e )
+            {
+                throw new MetadataRepositoryException( e.getMessage(), e );
+            }
+        }
+
+        String key = new ArtifactMetadataModel.KeyBuilder().withNamespace( namespace ).withProject( projectId ).withId(
+            artifactMeta.getId() ).withProjectVersion( projectVersion ).build();
 
         ArtifactMetadataModel artifactMetadataModel = artifactMetadataModelEntityManager.get( key );
         if ( artifactMetadataModel == null )
