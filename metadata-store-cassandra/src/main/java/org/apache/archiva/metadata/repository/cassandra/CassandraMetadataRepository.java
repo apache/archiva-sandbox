@@ -696,7 +696,7 @@ public class CassandraMetadataRepository
                         namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
                                                                                                  artifactMetadataModel.getProject() ) )
                     {
-                        versions.add( artifactMetadataModel.getVersion() );
+                        versions.add( artifactMetadataModel.getProjectVersion() );
                     }
                 }
                 return Boolean.TRUE;
@@ -1271,6 +1271,9 @@ public class CassandraMetadataRepository
         final String key =
             new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repositoryId ).withNamespace( namespace ).withId(
                 id ).withProjectVersion( version ).withProject( project ).build();
+
+        //String key = new ArtifactMetadataModel.KeyBuilder().withNamespace( namespace ).withProject( projectId ).withId(
+        //    artifactMeta.getId() ).withProjectVersion( projectVersion ).build();
 
         artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
         {

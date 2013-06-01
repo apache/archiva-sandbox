@@ -164,7 +164,7 @@ public class Namespace
 
         public KeyBuilder withNamespace( Namespace namespace )
         {
-            this.namespace = namespace.getId();
+            this.namespace = namespace.getName();
             this.repositoryId = namespace.getRepository().getId();
             return this;
         }
