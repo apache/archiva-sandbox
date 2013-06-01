@@ -639,6 +639,74 @@ public class CassandraMetadataRepository
     }
 
     @Override
+    public void removeProject( final String repositoryId, final String namespace, final String projectId )
+        throws MetadataRepositoryException
+    {
+
+        // cleanup ArtifactMetadataModel
+        final List<ArtifactMetadataModel> artifactMetadataModels = new ArrayList<ArtifactMetadataModel>();
+
+        artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
+            {
+                if ( artifactMetadataModel != null )
+                {
+                    if ( StringUtils.equals( artifactMetadataModel.getRepositoryId(), repositoryId )
+                        && StringUtils.equals( artifactMetadataModel.getNamespace(), namespace ) && StringUtils.equals(
+                        artifactMetadataModel.getProject(), projectId ) )
+                    {
+                        artifactMetadataModels.add( artifactMetadataModel );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        artifactMetadataModelEntityManager.remove( artifactMetadataModels );
+
+        String key = new Project.KeyBuilder().withNamespace(
+            new Namespace( namespace, new Repository( repositoryId ) ) ).withProjectId( projectId ).build();
+        Project project = projectEntityManager.get( key );
+        if ( project == null )
+        {
+            logger.debug( "removeProject notfound" );
+            return;
+        }
+        logger.debug( "removeProject {}", project );
+        projectEntityManager.remove( project );
+    }
+
+    @Override
+    public Collection<String> getProjectVersions( final String repoId, final String namespace, final String projectId )
+        throws MetadataResolutionException
+    {
+        final Set<String> versions = new HashSet<String>();
+
+        // FIXME use cql query
+        artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
+            {
+                if ( artifactMetadataModel != null )
+                {
+                    if ( StringUtils.equals( repoId, artifactMetadataModel.getRepositoryId() ) && StringUtils.equals(
+                        namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
+                                                                                                 artifactMetadataModel.getProject() ) )
+                    {
+                        versions.add( artifactMetadataModel.getVersion() );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        return versions;
+    }
+
+    @Override
     public void updateArtifact( String repositoryId, String namespaceId, String projectId, String projectVersion,
                                 ArtifactMetadata artifactMeta )
         throws MetadataRepositoryException
@@ -1440,33 +1508,6 @@ public class CassandraMetadataRepository
         return projects;
     }
 
-    @Override
-    public Collection<String> getProjectVersions( final String repoId, final String namespace, final String projectId )
-        throws MetadataResolutionException
-    {
-        final Set<String> versions = new HashSet<String>();
-
-        // FIXME use cql query
-        artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
-        {
-            @Override
-            public Boolean apply( ArtifactMetadataModel artifactMetadataModel )
-            {
-                if ( artifactMetadataModel != null )
-                {
-                    if ( StringUtils.equals( repoId, artifactMetadataModel.getRepositoryId() ) && StringUtils.equals(
-                        namespace, artifactMetadataModel.getNamespace() ) && StringUtils.equals( projectId,
-                                                                                                 artifactMetadataModel.getId() ) )
-                    {
-                        versions.add( artifactMetadataModel.getVersion() );
-                    }
-                }
-                return Boolean.TRUE;
-            }
-        } );
-
-        return versions;
-    }
 
     @Override
     public void removeProjectVersion( final String repoId, final String namespace, final String projectId,
@@ -1557,22 +1598,6 @@ public class CassandraMetadataRepository
         }
 
         return artifactMetadatas;
-    }
-
-    @Override
-    public void removeProject( String repositoryId, String namespace, String projectId )
-        throws MetadataRepositoryException
-    {
-        String key = new Project.KeyBuilder().withNamespace(
-            new Namespace( namespace, new Repository( repositoryId ) ) ).withProjectId( projectId ).build();
-        Project project = projectEntityManager.get( key );
-        if ( project == null )
-        {
-            logger.debug( "removeProject notfound" );
-            return;
-        }
-        logger.debug( "removeProject {}", project );
-        projectEntityManager.remove( project );
     }
 
     @Override
