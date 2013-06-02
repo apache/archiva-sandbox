@@ -874,11 +874,20 @@ public class CassandraMetadataRepository
         Namespace namespace = namespaceEntityManager.get( namespaceKey );
         if ( namespace == null )
         {
-            updateNamespace( repositoryId, namespaceId );
+            namespace = updateOrAddNamespace( repositoryId, namespaceId );
+        }
+
+        String key = new Project.KeyBuilder().withNamespace( namespace ).withProjectId( projectId ).build();
+
+        Project project = projectEntityManager.get( key );
+        if ( project == null )
+        {
+            project = new Project( key, projectId, namespace );
+            projectEntityManager.put( project );
         }
 
         // we don't test of repository and namespace really exist !
-        String key = new ProjectVersionMetadataModel.KeyBuilder().withRepository( repositoryId ).withNamespace(
+        key = new ProjectVersionMetadataModel.KeyBuilder().withRepository( repositoryId ).withNamespace(
             namespaceId ).withProjectId( projectId ).withId( versionMetadata.getId() ).build();
 
         ProjectVersionMetadataModel projectVersionMetadataModel = projectVersionMetadataModelEntityManager.get( key );
