@@ -32,13 +32,14 @@ public class Project
     implements Serializable
 {
     @Id
-    @Column(name = "projectId")
+    @Column( name = "projectKey" )
+    private String projectKey;
+
+    @Column( name = "projectId" )
     private String projectId;
 
-    @Column(name = "id")
-    private String id;
 
-    @Column(name = "repository")
+    @Column( name = "repository" )
     private Namespace namespace;
 
     public Project()
@@ -46,21 +47,21 @@ public class Project
         // no op
     }
 
-    public Project( String projectId, String id, Namespace namespace )
+    public Project( String projectKey, String projectId, Namespace namespace )
     {
         this.projectId = projectId;
-        this.id = id;
+        this.projectKey = projectKey;
         this.namespace = namespace;
     }
 
-    public String getId()
+    public String getProjectKey()
     {
-        return id;
+        return projectKey;
     }
 
-    public void setId( String id )
+    public void setProjectKey( String projectKey )
     {
-        this.id = id;
+        this.projectKey = projectKey;
     }
 
     public Namespace getNamespace()
@@ -97,7 +98,7 @@ public class Project
 
         Project project = (Project) o;
 
-        if ( !id.equals( project.id ) )
+        if ( !projectKey.equals( project.projectKey ) )
         {
             return false;
         }
@@ -112,9 +113,20 @@ public class Project
     @Override
     public int hashCode()
     {
-        int result = id.hashCode();
+        int result = projectKey.hashCode();
         result = 31 * result + namespace.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder sb = new StringBuilder( "Project{" );
+        sb.append( "projectKey='" ).append( projectKey ).append( '\'' );
+        sb.append( ", projectId='" ).append( projectId ).append( '\'' );
+        sb.append( ", namespace=" ).append( namespace );
+        sb.append( '}' );
+        return sb.toString();
     }
 
     public static class KeyBuilder
