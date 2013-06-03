@@ -1428,7 +1428,7 @@ public class CassandraMetadataRepository
                 {
                     if ( StringUtils.equals( repoId, project.getNamespace().getRepository().getName() )
                         && StringUtils.equals( namespace, project.getNamespace().getName() ) && StringUtils.equals( id,
-                                                                                                                    project.getId() ) )
+                                                                                                                    project.getProjectId() ) )
                     {
                         booleanHolder.value = true;
                     }
