@@ -1480,14 +1480,9 @@ public class CassandraMetadataRepository
 
         if ( projectVersionMetadataModel == null )
         {
-            projectVersionMetadataModelEntityManager.visitAll( new Function<ProjectVersionMetadataModel, Boolean>()
-            {
-                @Override
-                public Boolean apply( ProjectVersionMetadataModel projectVersionMetadataModel )
-                {
-                    return Boolean.TRUE;
-                }
-            } );
+            logger.debug(
+                "getProjectVersion repoId: '{}', namespace: '{}', projectId: '{}', projectVersion: {} -> not found",
+                repoId, namespace, projectId, projectVersion );
             return null;
         }
 
