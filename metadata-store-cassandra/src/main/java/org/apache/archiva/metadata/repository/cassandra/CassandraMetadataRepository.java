@@ -770,6 +770,22 @@ public class CassandraMetadataRepository
             throw new MetadataRepositoryException( e.getMessage(), e );
         }
 
+        key = new ProjectVersionMetadataModel.KeyBuilder().withRepository( repositoryId ).withNamespace(
+            namespace ).withProjectId( projectId ).withId( projectVersion ).build();
+
+        ProjectVersionMetadataModel projectVersionMetadataModel = projectVersionMetadataModelEntityManager.get( key );
+
+        if ( projectVersionMetadataModel == null )
+        {
+            projectVersionMetadataModel = new ProjectVersionMetadataModel();
+            projectVersionMetadataModel.setRowId( key );
+            projectVersionMetadataModel.setProjectId( projectId );
+            projectVersionMetadataModel.setId( projectVersion );
+            projectVersionMetadataModel.setNamespace( namespace );
+            projectVersionMetadataModelEntityManager.put( projectVersionMetadataModel );
+            // FIXME collections  ???
+        }
+
         // now facets
         updateFacets( artifactMeta, artifactMetadataModel );
 
@@ -1464,6 +1480,14 @@ public class CassandraMetadataRepository
 
         if ( projectVersionMetadataModel == null )
         {
+            projectVersionMetadataModelEntityManager.visitAll( new Function<ProjectVersionMetadataModel, Boolean>()
+            {
+                @Override
+                public Boolean apply( ProjectVersionMetadataModel projectVersionMetadataModel )
+                {
+                    return Boolean.TRUE;
+                }
+            } );
             return null;
         }
 
