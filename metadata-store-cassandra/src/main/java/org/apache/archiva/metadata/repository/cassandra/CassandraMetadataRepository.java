@@ -683,7 +683,24 @@ public class CassandraMetadataRepository
         throws MetadataResolutionException
     {
         final Set<String> versions = new HashSet<String>();
-
+        projectVersionMetadataModelEntityManager.visitAll( new Function<ProjectVersionMetadataModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( ProjectVersionMetadataModel projectVersionMetadataModel )
+            {
+                if ( projectVersionMetadataModel != null )
+                {
+                    if ( StringUtils.equals( repoId,
+                                             projectVersionMetadataModel.getNamespace().getRepository().getName() )
+                        && StringUtils.equals( namespace, projectVersionMetadataModel.getNamespace().getName() )
+                        && StringUtils.equals( projectId, projectVersionMetadataModel.getProjectId() ) )
+                    {
+                        versions.add( projectVersionMetadataModel.getId() );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
         // FIXME use cql query
         artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
         {

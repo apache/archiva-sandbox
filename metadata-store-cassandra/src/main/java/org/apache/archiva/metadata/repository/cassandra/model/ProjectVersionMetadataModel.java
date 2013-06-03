@@ -101,6 +101,7 @@ public class ProjectVersionMetadataModel
         this.rowId = rowId;
     }
 
+    // FIXME must be renamed getVersion !!!
     public String getId()
     {
         return id;
