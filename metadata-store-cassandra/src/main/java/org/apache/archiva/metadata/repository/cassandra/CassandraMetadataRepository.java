@@ -1340,17 +1340,18 @@ public class CassandraMetadataRepository
     {
         logger.debug( "removeArtifact repositoryId: '{}', namespace: '{}', project: '{}', version: '{}', id: '{}'",
                       repositoryId, namespace, project, version, id );
-         String key =
+        String key =
             new ArtifactMetadataModel.KeyBuilder().withRepositoryId( repositoryId ).withNamespace( namespace ).withId(
                 id ).withProjectVersion( version ).withProject( project ).build();
-
 
         ArtifactMetadataModel artifactMetadataModel = new ArtifactMetadataModel();
         artifactMetadataModel.setArtifactMetadataModelId( key );
 
         artifactMetadataModelEntityManager.remove( artifactMetadataModel );
 
-        key = new ProjectVersionMetadataModel.KeyBuilder().withId( version ).withRepository( repositoryId ).withNamespace( namespace ).withProjectId( project ).build();
+        key =
+            new ProjectVersionMetadataModel.KeyBuilder().withId( version ).withRepository( repositoryId ).withNamespace(
+                namespace ).withProjectId( project ).build();
 
         ProjectVersionMetadataModel projectVersionMetadataModel = new ProjectVersionMetadataModel();
         projectVersionMetadataModel.setRowId( key );
@@ -1636,6 +1637,14 @@ public class CassandraMetadataRepository
         }
 
         artifactMetadataModelEntityManager.remove( artifactMetadataModels );
+
+        String key = new ProjectVersionMetadataModel.KeyBuilder().withProjectId( projectId ).withId(
+            projectVersion ).withRepository( repoId ).withNamespace( namespace ).build();
+
+        ProjectVersionMetadataModel projectVersionMetadataModel = new ProjectVersionMetadataModel();
+        projectVersionMetadataModel.setRowId( key );
+
+        projectVersionMetadataModelEntityManager.remove( projectVersionMetadataModel );
     }
 
     @Override
