@@ -692,7 +692,7 @@ public class CassandraMetadataRepository
                 {
                     if ( StringUtils.equals( repoId,
                                              projectVersionMetadataModel.getNamespace().getRepository().getName() )
-                        && StringUtils.equals( namespace, projectVersionMetadataModel.getNamespace().getName() )
+                        && StringUtils.startsWith( projectVersionMetadataModel.getNamespace().getName(), namespace )
                         && StringUtils.equals( projectId, projectVersionMetadataModel.getProjectId() ) )
                     {
                         versions.add( projectVersionMetadataModel.getId() );
@@ -1536,6 +1536,24 @@ public class CassandraMetadataRepository
         final Set<String> projects = new HashSet<String>();
 
         // FIXME use cql query
+        projectEntityManager.visitAll( new Function<Project, Boolean>()
+        {
+            @Override
+            public Boolean apply( Project project )
+            {
+                if ( project != null )
+                {
+                    if ( StringUtils.equals( repoId, project.getNamespace().getRepository().getName() )
+                        && StringUtils.startsWith( project.getNamespace().getName(), namespace ) )
+                    {
+                        projects.add( project.getProjectId() );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+        /*
+
         artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
         {
             @Override
@@ -1552,7 +1570,7 @@ public class CassandraMetadataRepository
                 return Boolean.TRUE;
             }
         } );
-
+        */
         return projects;
     }
 
