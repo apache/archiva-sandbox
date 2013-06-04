@@ -157,7 +157,7 @@ public class Project
         public String build()
         {
             // FIXME add some controls
-            return new Namespace.KeyBuilder().withNamespace( this.namespace ) + "-" + this.projectId;
+            return new Namespace.KeyBuilder().withNamespace( this.namespace ).build() + "-" + this.projectId;
         }
     }
 }

@@ -639,7 +639,7 @@ public class CassandraMetadataRepository
     }
 
     @Override
-    public void removeProject( final String repositoryId, final String namespace, final String projectId )
+    public void removeProject( final String repositoryId, final String namespaceId, final String projectId )
         throws MetadataRepositoryException
     {
 
@@ -654,8 +654,8 @@ public class CassandraMetadataRepository
                 if ( artifactMetadataModel != null )
                 {
                     if ( StringUtils.equals( artifactMetadataModel.getRepositoryId(), repositoryId )
-                        && StringUtils.equals( artifactMetadataModel.getNamespace(), namespace ) && StringUtils.equals(
-                        artifactMetadataModel.getProject(), projectId ) )
+                        && StringUtils.equals( artifactMetadataModel.getNamespace(), namespaceId )
+                        && StringUtils.equals( artifactMetadataModel.getProject(), projectId ) )
                     {
                         artifactMetadataModels.add( artifactMetadataModel );
                     }
@@ -666,8 +666,37 @@ public class CassandraMetadataRepository
 
         artifactMetadataModelEntityManager.remove( artifactMetadataModels );
 
-        String key = new Project.KeyBuilder().withNamespace(
-            new Namespace( namespace, new Repository( repositoryId ) ) ).withProjectId( projectId ).build();
+        Namespace namespace = new Namespace( namespaceId, new Repository( repositoryId ) );
+
+        final List<ProjectVersionMetadataModel> projectVersionMetadataModels =
+            new ArrayList<ProjectVersionMetadataModel>();
+
+        projectVersionMetadataModelEntityManager.visitAll( new Function<ProjectVersionMetadataModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( ProjectVersionMetadataModel projectVersionMetadataModel )
+            {
+                if ( projectVersionMetadataModel != null )
+                {
+                    if ( StringUtils.equals( repositoryId,
+                                             projectVersionMetadataModel.getNamespace().getRepository().getName() )
+                        && StringUtils.equals( namespaceId, projectVersionMetadataModel.getNamespace().getName() )
+                        && StringUtils.equals( projectId, projectVersionMetadataModel.getProjectId() ) )
+                    {
+                        projectVersionMetadataModels.add( projectVersionMetadataModel );
+                    }
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        if ( !projectVersionMetadataModels.isEmpty() )
+        {
+            projectVersionMetadataModelEntityManager.remove( projectVersionMetadataModels );
+        }
+
+        String key = new Project.KeyBuilder().withNamespace( namespace ).withProjectId( projectId ).build();
+
         Project project = projectEntityManager.get( key );
         if ( project == null )
         {
@@ -675,6 +704,7 @@ public class CassandraMetadataRepository
             return;
         }
         logger.debug( "removeProject {}", project );
+
         projectEntityManager.remove( project );
     }
 
