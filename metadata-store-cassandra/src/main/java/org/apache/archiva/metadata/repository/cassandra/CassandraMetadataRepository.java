@@ -460,7 +460,7 @@ public class CassandraMetadataRepository
     {
         try
         {
-            final Set<Namespace> namespaces = new HashSet<Namespace>();
+            final Set<String> namespaces = new HashSet<String>();
 
             namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
             {
@@ -471,23 +471,17 @@ public class CassandraMetadataRepository
                     if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
                                                                                                                  namespace.getRepository().getId() ) )
                     {
-                        if ( !StringUtils.contains( namespace.getName(), "." ) )
+                        String name = namespace.getName();
+                        if ( StringUtils.isNotEmpty( name ) )
                         {
-                            namespaces.add( namespace );
+                            namespaces.add( StringUtils.substringBefore( name, "." ) );
                         }
                     }
                     return Boolean.TRUE;
                 }
             } );
 
-            List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
-
-            for ( Namespace namespace : namespaces )
-            {
-                namespaceNames.add( namespace.getName() );
-            }
-
-            return namespaceNames;
+            return namespaces;
         }
         catch ( PersistenceException e )
         {
@@ -501,7 +495,7 @@ public class CassandraMetadataRepository
     {
         try
         {
-            final Set<Namespace> namespaces = new HashSet<Namespace>();
+            final Set<String> namespaces = new HashSet<String>();
 
             namespaceEntityManager.visitAll( new Function<Namespace, Boolean>()
             {
@@ -517,21 +511,23 @@ public class CassandraMetadataRepository
                         if ( StringUtils.startsWith( currentNamespace, namespaceId ) && (
                             StringUtils.length( currentNamespace ) > StringUtils.length( namespaceId ) ) )
                         {
-                            namespaces.add( namespace );
+                            // store after namespaceId '.' but before next '.'
+                            // call org namespace org.apache.maven.shared -> stored apache
+
+                            String calledNamespace =
+                                StringUtils.endsWith( namespaceId, "." ) ? namespaceId : namespaceId + ".";
+                            String storedNamespace = StringUtils.substringAfter( currentNamespace, calledNamespace );
+
+                            storedNamespace = StringUtils.substringBefore( storedNamespace, "." );
+
+                            namespaces.add( storedNamespace );
                         }
                     }
                     return Boolean.TRUE;
                 }
             } );
 
-            List<String> namespaceNames = new ArrayList<String>( namespaces.size() );
-
-            for ( Namespace namespace : namespaces )
-            {
-                namespaceNames.add( namespace.getName() );
-            }
-
-            return namespaceNames;
+            return namespaces;
         }
         catch ( PersistenceException e )
         {
