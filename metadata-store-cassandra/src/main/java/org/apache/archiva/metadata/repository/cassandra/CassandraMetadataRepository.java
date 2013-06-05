@@ -278,8 +278,6 @@ public class CassandraMetadataRepository
                 repository = new Repository( repositoryId );
 
                 Namespace namespace = new Namespace( namespaceId, repository );
-                //namespace.setRepository( repository );
-                //repository.getNamespaces().add( namespace );
                 this.repositoryEntityManager.put( repository );
 
                 this.namespaceEntityManager.put( namespace );
@@ -514,7 +512,10 @@ public class CassandraMetadataRepository
                     if ( namespace != null && namespace.getRepository() != null && StringUtils.equalsIgnoreCase( repoId,
                                                                                                                  namespace.getRepository().getId() ) )
                     {
-                        if ( StringUtils.startsWith( namespace.getName(), namespaceId ) )
+                        String currentNamespace = namespace.getName();
+                        // we only return childs
+                        if ( StringUtils.startsWith( currentNamespace, namespaceId ) && (
+                            StringUtils.length( currentNamespace ) > StringUtils.length( namespaceId ) ) )
                         {
                             namespaces.add( namespace );
                         }
