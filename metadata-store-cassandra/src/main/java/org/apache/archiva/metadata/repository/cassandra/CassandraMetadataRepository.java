@@ -844,7 +844,7 @@ public class CassandraMetadataRepository
                                                    final String projectVersion )
         throws MetadataResolutionException
     {
-        final List<String> versions = new ArrayList<String>();
+        final Set<String> versions = new HashSet<String>();
         // FIXME use cql query
         artifactMetadataModelEntityManager.visitAll( new Function<ArtifactMetadataModel, Boolean>()
         {
