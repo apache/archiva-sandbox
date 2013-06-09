@@ -1080,30 +1080,28 @@ public class CassandraMetadataRepository
         throws MetadataRepositoryException
     {
 
-        if ( metadataFacet == null || metadataFacet.toProperties() == null || metadataFacet.toProperties().isEmpty() )
+        if ( metadataFacet == null )
         {
             return;
         }
-        for ( Map.Entry<String, String> entry : metadataFacet.toProperties().entrySet() )
+
+        if ( metadataFacet.toProperties().isEmpty() )
         {
-
             String key = new MetadataFacetModel.KeyBuilder().withRepositoryId( repositoryId ).withFacetId(
-                metadataFacet.getFacetId() ).withName( metadataFacet.getName() ).withKey( entry.getKey() ).build();
-
+                metadataFacet.getFacetId() ).withName( metadataFacet.getName() ).build();
             MetadataFacetModel metadataFacetModel = metadataFacetModelEntityManager.get( key );
             if ( metadataFacetModel == null )
             {
                 metadataFacetModel = new MetadataFacetModel();
-                // we need to store the repositoryId
-                ArtifactMetadataModel artifactMetadataModel = new ArtifactMetadataModel();
-                artifactMetadataModel.setRepositoryId( repositoryId );
-                metadataFacetModel.setArtifactMetadataModel( artifactMetadataModel );
-                metadataFacetModel.setId( key );
-                metadataFacetModel.setKey( entry.getKey() );
-                metadataFacetModel.setFacetId( metadataFacet.getFacetId() );
-                metadataFacetModel.setName( metadataFacetModel.getName() );
             }
-            metadataFacetModel.setValue( entry.getValue() );
+            // we need to store the repositoryId
+            ArtifactMetadataModel artifactMetadataModel = new ArtifactMetadataModel();
+            artifactMetadataModel.setRepositoryId( repositoryId );
+            metadataFacetModel.setArtifactMetadataModel( artifactMetadataModel );
+            metadataFacetModel.setId( key );
+            metadataFacetModel.setFacetId( metadataFacet.getFacetId() );
+            metadataFacetModel.setName( metadataFacetModel.getName() );
+
             try
             {
                 metadataFacetModelEntityManager.put( metadataFacetModel );
@@ -1112,7 +1110,39 @@ public class CassandraMetadataRepository
             {
                 throw new MetadataRepositoryException( e.getMessage(), e );
             }
+        }
+        else
+        {
+            for ( Map.Entry<String, String> entry : metadataFacet.toProperties().entrySet() )
+            {
 
+                String key = new MetadataFacetModel.KeyBuilder().withRepositoryId( repositoryId ).withFacetId(
+                    metadataFacet.getFacetId() ).withName( metadataFacet.getName() ).withKey( entry.getKey() ).build();
+
+                MetadataFacetModel metadataFacetModel = metadataFacetModelEntityManager.get( key );
+                if ( metadataFacetModel == null )
+                {
+                    metadataFacetModel = new MetadataFacetModel();
+                    // we need to store the repositoryId
+                    ArtifactMetadataModel artifactMetadataModel = new ArtifactMetadataModel();
+                    artifactMetadataModel.setRepositoryId( repositoryId );
+                    metadataFacetModel.setArtifactMetadataModel( artifactMetadataModel );
+                    metadataFacetModel.setId( key );
+                    metadataFacetModel.setKey( entry.getKey() );
+                    metadataFacetModel.setFacetId( metadataFacet.getFacetId() );
+                    metadataFacetModel.setName( metadataFacetModel.getName() );
+                }
+                metadataFacetModel.setValue( entry.getValue() );
+                try
+                {
+                    metadataFacetModelEntityManager.put( metadataFacetModel );
+                }
+                catch ( PersistenceException e )
+                {
+                    throw new MetadataRepositoryException( e.getMessage(), e );
+                }
+
+            }
         }
     }
 
