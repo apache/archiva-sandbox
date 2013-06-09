@@ -1130,7 +1130,7 @@ public class CassandraMetadataRepository
                     metadataFacetModel.setId( key );
                     metadataFacetModel.setKey( entry.getKey() );
                     metadataFacetModel.setFacetId( metadataFacet.getFacetId() );
-                    metadataFacetModel.setName( metadataFacetModel.getName() );
+                    metadataFacetModel.setName( metadataFacet.getName() );
                 }
                 metadataFacetModel.setValue( entry.getValue() );
                 try
