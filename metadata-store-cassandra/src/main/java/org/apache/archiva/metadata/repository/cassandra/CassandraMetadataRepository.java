@@ -20,6 +20,8 @@ package org.apache.archiva.metadata.repository.cassandra;
  */
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.connectionpool.exceptions.NotFoundException;
@@ -54,6 +56,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1760,6 +1763,87 @@ public class CassandraMetadataRepository
             ArtifactMetadata artifactMetadata = new BeanReplicator().replicateBean( model, ArtifactMetadata.class );
             populateFacets( artifactMetadata );
             artifactMetadatas.add( artifactMetadata );
+        }
+
+        // retrieve facets
+        final List<MetadataFacetModel> metadataFacetModels = new ArrayList<MetadataFacetModel>();
+        metadataFacetModelEntityManager.visitAll( new Function<MetadataFacetModel, Boolean>()
+        {
+            @Override
+            public Boolean apply( MetadataFacetModel metadataFacetModel )
+            {
+                if ( metadataFacetModel != null )
+                {
+                    if ( StringUtils.equals( repoId, metadataFacetModel.getArtifactMetadataModel().getRepositoryId() )
+                        && StringUtils.equals( namespace, metadataFacetModel.getArtifactMetadataModel().getNamespace() )
+                        && StringUtils.equals( projectId, metadataFacetModel.getArtifactMetadataModel().getProject() )
+                        && StringUtils.equals( projectVersion,
+                                               metadataFacetModel.getArtifactMetadataModel().getProjectVersion() ) )
+                    {
+                        metadataFacetModels.add( metadataFacetModel );
+                    }
+
+                }
+                return Boolean.TRUE;
+            }
+        } );
+
+        // rebuild MetadataFacet for artifacts
+
+        for ( final ArtifactMetadata artifactMetadata : artifactMetadatas )
+        {
+            Iterable<MetadataFacetModel> metadataFacetModelIterable =
+                Iterables.filter( metadataFacetModels, new Predicate<MetadataFacetModel>()
+                {
+                    @Override
+                    public boolean apply( MetadataFacetModel metadataFacetModel )
+                    {
+                        if ( metadataFacetModel != null )
+                        {
+                            return StringUtils.equals( artifactMetadata.getVersion(),
+                                                       metadataFacetModel.getArtifactMetadataModel().getVersion() );
+                        }
+                        return false;
+                    }
+                } );
+            Iterator<MetadataFacetModel> iterator = metadataFacetModelIterable.iterator();
+            Map<String, List<MetadataFacetModel>> metadataFacetValuesPerFacetId =
+                new HashMap<String, List<MetadataFacetModel>>();
+            while ( iterator.hasNext() )
+            {
+                MetadataFacetModel metadataFacetModel = iterator.next();
+                List<MetadataFacetModel> values = metadataFacetValuesPerFacetId.get( metadataFacetModel.getName() );
+                if ( values == null )
+                {
+                    values = new ArrayList<MetadataFacetModel>();
+                    metadataFacetValuesPerFacetId.put( metadataFacetModel.getFacetId(), values );
+                }
+                values.add( metadataFacetModel );
+
+            }
+
+            for ( Map.Entry<String, List<MetadataFacetModel>> entry : metadataFacetValuesPerFacetId.entrySet() )
+            {
+                MetadataFacetFactory metadataFacetFactory = metadataFacetFactories.get( entry.getKey() );
+                if ( metadataFacetFactory != null )
+                {
+                    List<MetadataFacetModel> facetModels = entry.getValue();
+                    if ( !facetModels.isEmpty() )
+                    {
+                        MetadataFacet metadataFacet =
+                            metadataFacetFactory.createMetadataFacet( repoId, facetModels.get( 0 ).getName() );
+                        Map<String, String> props = new HashMap<String, String>( facetModels.size() );
+                        for ( MetadataFacetModel metadataFacetModel : facetModels )
+                        {
+                            props.put( metadataFacetModel.getKey(), metadataFacetModel.getValue() );
+                        }
+                        metadataFacet.fromProperties( props );
+                        artifactMetadata.addFacet( metadataFacet );
+                    }
+                }
+            }
+
+
         }
 
         return artifactMetadatas;
