@@ -1100,7 +1100,7 @@ public class CassandraMetadataRepository
             metadataFacetModel.setArtifactMetadataModel( artifactMetadataModel );
             metadataFacetModel.setId( key );
             metadataFacetModel.setFacetId( metadataFacet.getFacetId() );
-            metadataFacetModel.setName( metadataFacetModel.getName() );
+            metadataFacetModel.setName( metadataFacet.getName() );
 
             try
             {
