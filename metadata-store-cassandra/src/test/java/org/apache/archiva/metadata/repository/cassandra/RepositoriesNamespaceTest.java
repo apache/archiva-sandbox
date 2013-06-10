@@ -91,7 +91,7 @@ public class RepositoriesNamespaceTest
             Assertions.assertThat( cmr.getRepositories() ).isNotEmpty().hasSize( 1 );
             Assertions.assertThat( cmr.getNamespaces( "release" ) ).isNotEmpty().hasSize( 1 );
 
-            n = cmr.getNamespaceEntityManager().get( "org" + "-" + "release" );
+            n = cmr.getNamespaceEntityManager().get( "release" + "-" + "org" );
 
             Assertions.assertThat( n ).isNotNull();
             Assertions.assertThat( n.getRepository() ).isNotNull();
