@@ -30,6 +30,4 @@
   <context:annotation-config/>
   <context:component-scan base-package="org.apache.archiva.metadata.repository.cassandra"/>
 
-
-
 </beans>
