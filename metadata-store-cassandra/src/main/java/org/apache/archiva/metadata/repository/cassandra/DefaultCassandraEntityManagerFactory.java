@@ -60,14 +60,14 @@ public class DefaultCassandraEntityManagerFactory
     public void initialize()
         throws ConnectionException
     {
-
+        String cassandraPort = System.getProperty( "cassandraPort" );
         keyspaceContext = new AstyanaxContext.Builder().forCluster( CLUSTER_NAME ).forKeyspace(
             KEYSPACE_NAME ).withAstyanaxConfiguration(
             new AstyanaxConfigurationImpl().setDiscoveryType( NodeDiscoveryType.RING_DESCRIBE ).setConnectionPoolType(
                 ConnectionPoolType.TOKEN_AWARE ) ).withConnectionPoolConfiguration(
             new ConnectionPoolConfigurationImpl( CLUSTER_NAME + "_" + KEYSPACE_NAME ).setSocketTimeout(
                 30000 ).setMaxTimeoutWhenExhausted( 2000 ).setMaxConnsPerHost( 20 ).setInitConnsPerHost( 10 ).setSeeds(
-                "localhost:9160" ) ).withConnectionPoolMonitor( new CountingConnectionPoolMonitor() ).buildKeyspace(
+                "localhost:"+ cassandraPort ) ).withConnectionPoolMonitor( new CountingConnectionPoolMonitor() ).buildKeyspace(
             ThriftFamilyFactory.getInstance() );
 
         keyspaceContext.start();
