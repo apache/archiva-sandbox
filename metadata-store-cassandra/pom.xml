@@ -30,6 +30,10 @@
   <packaging>bundle</packaging>
   <name>Archiva Core Plugins :: Cassandra JPA Storage for Metadata</name>
 
+  <properties>
+    <cassandraVersion>1.2.5</cassandraVersion>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>commons-lang</groupId>
@@ -135,7 +139,7 @@
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-all</artifactId>
-      <version>1.2.5</version>
+      <version>${cassandraVersion}</version>
       <exclusions>
         <exclusion>
           <groupId>log4j</groupId>
@@ -240,6 +244,13 @@
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.cassandra</groupId>
+            <artifactId>cassandra-all</artifactId>
+            <version>${cassandraVersion}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
