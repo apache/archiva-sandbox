@@ -77,33 +77,6 @@
       </exclusions>
     </dependency>
 
-    <!--
-    <dependency>
-      <groupId>com.impetus.client</groupId>
-      <artifactId>kundera-cassandra</artifactId>
-      <version>2.6-SNAPSHOT</version>
-      <exclusions>
-        <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.transaction</groupId>
-          <artifactId>jta</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-core</artifactId>
-        </exclusion>
-
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    -->
-
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jpa_2.0_spec</artifactId>
@@ -219,11 +192,7 @@
       <artifactId>jackson-mapper-asl</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--dependency>
-      <groupId>org.apache.archiva</groupId>
-      <artifactId>maven2-repository</artifactId>
-      <scope>test</scope>
-    </dependency-->
+
   </dependencies>
   <build>
     <testResources>
@@ -241,7 +210,7 @@
             <Bundle-SymbolicName>org.apache.archiva.metadata.repository.cassandra</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
             <Export-Package>
-              org.apache.archiva.metadata.repository.jpa;version=${project.version};-split-package:=merge-first
+              org.apache.archiva.metadata.repository.cassandra;version=${project.version};-split-package:=merge-first
             </Export-Package>
             <Import-Package>
 
