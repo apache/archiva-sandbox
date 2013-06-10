@@ -37,6 +37,7 @@ import javax.inject.Inject;
 
 /**
  * FIXME make all configuration not hardcoded :-)
+ *
  * @author Olivier Lamy
  */
 @Service("archivaEntityManagerFactory#cassandra")
@@ -60,6 +61,7 @@ public class DefaultCassandraEntityManagerFactory
     public void initialize()
         throws ConnectionException
     {
+        String cassandraHost = System.getProperty( "cassandraHost", "localhost" );
         String cassandraPort = System.getProperty( "cassandraPort" );
         keyspaceContext = new AstyanaxContext.Builder().forCluster( CLUSTER_NAME ).forKeyspace(
             KEYSPACE_NAME ).withAstyanaxConfiguration(
@@ -67,8 +69,8 @@ public class DefaultCassandraEntityManagerFactory
                 ConnectionPoolType.TOKEN_AWARE ) ).withConnectionPoolConfiguration(
             new ConnectionPoolConfigurationImpl( CLUSTER_NAME + "_" + KEYSPACE_NAME ).setSocketTimeout(
                 30000 ).setMaxTimeoutWhenExhausted( 2000 ).setMaxConnsPerHost( 20 ).setInitConnsPerHost( 10 ).setSeeds(
-                "localhost:"+ cassandraPort ) ).withConnectionPoolMonitor( new CountingConnectionPoolMonitor() ).buildKeyspace(
-            ThriftFamilyFactory.getInstance() );
+                cassandraHost + ":" + cassandraPort ) ).withConnectionPoolMonitor(
+            new CountingConnectionPoolMonitor() ).buildKeyspace( ThriftFamilyFactory.getInstance() );
 
         keyspaceContext.start();
 
