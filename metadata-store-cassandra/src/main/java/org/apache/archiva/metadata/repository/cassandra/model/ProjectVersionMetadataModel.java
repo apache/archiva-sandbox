@@ -73,7 +73,7 @@ public class ProjectVersionMetadataModel
     @Column(name = "scm")
     private Scm scm;
 
-    @Column(name = "issueManagement")
+    @Column(name = "ciManagement")
     private CiManagement ciManagement;
 
     // FIXME store those values in a separate table
@@ -239,6 +239,7 @@ public class ProjectVersionMetadataModel
     {
         this.dependencies = dependencies;
     }
+
 
     @Override
     public String toString()
