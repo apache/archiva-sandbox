@@ -829,8 +829,9 @@ public class CassandraMetadataRepository
             projectVersionMetadataModel.setProjectId( projectId );
             projectVersionMetadataModel.setId( projectVersion );
             projectVersionMetadataModel.setNamespace( namespace );
+
             projectVersionMetadataModelEntityManager.put( projectVersionMetadataModel );
-            // FIXME collections  ???
+
         }
 
         // now facets
@@ -967,7 +968,11 @@ public class CassandraMetadataRepository
         projectVersionMetadataModel.setIssueManagement( versionMetadata.getIssueManagement() );
         projectVersionMetadataModel.setOrganization( versionMetadata.getOrganization() );
         projectVersionMetadataModel.setScm( versionMetadata.getScm() );
-        // FIXME collections !!
+
+        projectVersionMetadataModel.setMailingLists( versionMetadata.getMailingLists() );
+        projectVersionMetadataModel.setDependencies( versionMetadata.getDependencies() );
+        projectVersionMetadataModel.setLicenses( versionMetadata.getLicenses() );
+
 
         try
         {

@@ -20,13 +20,18 @@ package org.apache.archiva.metadata.repository.cassandra.model;
  */
 
 import org.apache.archiva.metadata.model.CiManagement;
+import org.apache.archiva.metadata.model.Dependency;
 import org.apache.archiva.metadata.model.IssueManagement;
+import org.apache.archiva.metadata.model.License;
+import org.apache.archiva.metadata.model.MailingList;
 import org.apache.archiva.metadata.model.Organization;
 import org.apache.archiva.metadata.model.Scm;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Olivier Lamy
@@ -72,11 +77,14 @@ public class ProjectVersionMetadataModel
     private CiManagement ciManagement;
 
     // FIXME store those values in a separate table
-    //private List<License> licenses = new ArrayList<License>();
+    @Column(name = "licenses")
+    private List<License> licenses = new ArrayList<License>();
 
-    //private List<MailingList> mailingLists = new ArrayList<MailingList>();
+    @Column(name = "mailingLists")
+    private List<MailingList> mailingLists = new ArrayList<MailingList>();
 
-    //private List<Dependency> dependencies = new ArrayList<Dependency>();
+    @Column(name = "dependencies")
+    private List<Dependency> dependencies = new ArrayList<Dependency>();
 
     @Column(name = "incomplete")
     private boolean incomplete;
@@ -200,6 +208,36 @@ public class ProjectVersionMetadataModel
     public void setNamespace( Namespace namespace )
     {
         this.namespace = namespace;
+    }
+
+    public List<License> getLicenses()
+    {
+        return licenses;
+    }
+
+    public void setLicenses( List<License> licenses )
+    {
+        this.licenses = licenses;
+    }
+
+    public List<MailingList> getMailingLists()
+    {
+        return mailingLists;
+    }
+
+    public void setMailingLists( List<MailingList> mailingLists )
+    {
+        this.mailingLists = mailingLists;
+    }
+
+    public List<Dependency> getDependencies()
+    {
+        return dependencies;
+    }
+
+    public void setDependencies( List<Dependency> dependencies )
+    {
+        this.dependencies = dependencies;
     }
 
     @Override
