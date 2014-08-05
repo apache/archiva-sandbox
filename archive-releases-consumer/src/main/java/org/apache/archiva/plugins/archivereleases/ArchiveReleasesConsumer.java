@@ -27,6 +27,7 @@ import org.apache.archiva.consumers.ConsumerException;
 import org.apache.archiva.consumers.KnownRepositoryContentConsumer;
 import org.apache.archiva.redback.components.registry.Registry;
 import org.apache.archiva.redback.components.registry.RegistryListener;
+import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.util.SelectorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -232,6 +234,8 @@ public class ArchiveReleasesConsumer
             }
         }
 
+        totalSize += artifactFile.length();
+
         File targetFile = new File( repositoryArchive, path );
         if ( dryRun )
         {
@@ -241,14 +245,16 @@ public class ArchiveReleasesConsumer
         {
             log.info( "archiving file [" + artifactFile.getAbsolutePath() + "] to [" + targetFile + "]" );
 
-            if ( !artifactFile.renameTo( targetFile ) )
+            try
+            {
+                FileUtils.moveFileToDirectory( artifactFile, targetFile.getParentFile(), true );
+            }
+            catch ( IOException e )
             {
                 log.error(
-                    "Unknown error moving file [" + artifactFile.getAbsolutePath() + "] to [" + targetFile + "]" );
+                    "Error moving file [" + artifactFile.getAbsolutePath() + "] to [" + targetFile + "]: " + e.getLocalizedMessage(), e );
             }
         }
-
-        totalSize += artifactFile.length();
     }
 
     private boolean fileNewerThanTarget( File artifactFile )
