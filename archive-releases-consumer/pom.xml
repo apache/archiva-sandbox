@@ -32,7 +32,7 @@
   <properties>
     <archiva.version>2.1.1-SNAPSHOT</archiva.version>
     <slf4j.version>1.7.7</slf4j.version>
-    <log4j.version>2.0</log4j.version>
+    <log4j.version>2.17.1</log4j.version>
     <spring.version>4.0.6.RELEASE</spring.version>
     <redback.registry.version>2.3</redback.registry.version>
     <guava.version>16.0.1</guava.version>
